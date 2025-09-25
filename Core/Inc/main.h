@@ -99,8 +99,8 @@ void Error_Handler(void);
 #define SHUTDOWN_EN_GPIO_Port GPIOE
 /* -------------------- Level Shifter Pin Definitions -------------------- */
 // LEVEL_SHIFT_OE_Pin, LEVEL_SHIFT_OE_GPIO_Port: Level shifter output enable pin
-#define LEVEL_SHIFT_OE_Pin GPIO_PIN_0
-#define LEVEL_SHIFT_OE_GPIO_Port GPIOD
+#define LEVEL_SHIFT_OE_Pin GPIO_PIN_14
+#define LEVEL_SHIFT_OE_GPIO_Port GPIOE
 /* -------------------- ADC Pin Definitions -------------------- */
 #define ADC_RESET_Pin GPIO_PIN_0
 #define ADC_RESET_GPIO_Port GPIOA

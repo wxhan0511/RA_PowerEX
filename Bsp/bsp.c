@@ -37,6 +37,7 @@ static HAL_StatusTypeDef bsp_init_adc_system(void);
 static void bsp_test_spi_flash(void);
 static void bsp_init_power_control(void);
 static void bsp_init_interrupts(void);
+static void bsp_level_shift_direction_set(uint8_t dir);
 
 
 /**
@@ -91,7 +92,7 @@ void bsp_init()
     calibration_load();
     bsp_init_power_control();
     bsp_init_adc_system();
-
+    bsp_level_shift_direction_set(1);
     bsp_dac_init(&dac_dev);
     RA_POWEREX_INFO("------------- bsp init finish -------------\r\n");
 }
@@ -108,6 +109,7 @@ static void bsp_init_power_control(void)
     //On by default
     SHUTDOWN_ENABLE();
     RA_POWEREX_INFO("------------- bsp init power control finish -------------\r\n");
+
 }
 /**
  * @brief Print system version information
@@ -157,6 +159,17 @@ static HAL_StatusTypeDef bsp_init_adc_system(void)
     RA_POWEREX_INFO("------------- bsp init ads1256 finish -------------\r\n");
 }
 
+static void bsp_level_shift_direction_set(uint8_t dir)
+{
+    if (dir)
+    {
+        HAL_GPIO_WritePin(LEVEL_SHIFT_OE_GPIO_Port, LEVEL_SHIFT_OE_Pin, GPIO_PIN_SET);  // Set direction to high
+    }
+    else
+    {
+        HAL_GPIO_WritePin(LEVEL_SHIFT_OE_GPIO_Port, LEVEL_SHIFT_OE_Pin, GPIO_PIN_RESET); // Set direction to low
+    }
+}
 /* Optional: Flash test function (currently disabled) */
 /**
  * @brief Test SPI Flash read/write/erase operations

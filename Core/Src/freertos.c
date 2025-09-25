@@ -644,7 +644,11 @@ void I2C_RecoverSDA(I2C_HandleTypeDef *hi2c , GPIO_TypeDef* port , uint16_t scl 
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;        // 复用开漏模式
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;     // 根据实际 I2C 外设调整
+    if(hi2c == &hi2c1) {
+        GPIO_InitStruct.Alternate = GPIO_AF4_I2C1; // 根据实际 I2C 外设调整
+    } else if(hi2c == &hi2c2) {
+        GPIO_InitStruct.Alternate = GPIO_AF4_I2C2; // 根据实际 I2C 外设调整
+    }
     HAL_GPIO_Init(port, &GPIO_InitStruct);
 
     // 6. 重新启用 I2C 外设
@@ -681,7 +685,11 @@ bool I2C_IsSDALow(I2C_HandleTypeDef *hi2c , GPIO_TypeDef* port , uint16_t scl , 
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;    // 复用开漏模式
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF4_I2C1; // 根据实际 I2C 外设调整
+    if(hi2c == &hi2c1) {
+        GPIO_InitStruct.Alternate = GPIO_AF4_I2C1; // 根据实际 I2C 外设调整
+    } else if(hi2c == &hi2c2) {
+        GPIO_InitStruct.Alternate = GPIO_AF4_I2C2; // 根据实际 I2C 外设调整
+    }
     HAL_GPIO_Init(port, &GPIO_InitStruct);
 
     // 5. 重新启用 I2C 外设
@@ -717,7 +725,11 @@ bool I2C_IsSCLLow(I2C_HandleTypeDef *hi2c , GPIO_TypeDef* port , uint16_t scl , 
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;    // 复用开漏模式
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF4_I2C1; // 根据实际 I2C 外设调整
+    if(hi2c == &hi2c1) {
+        GPIO_InitStruct.Alternate = GPIO_AF4_I2C1; // 根据实际 I2C 外设调整
+    } else if(hi2c == &hi2c2) {
+        GPIO_InitStruct.Alternate = GPIO_AF4_I2C2; // 根据实际 I2C 外设调整
+    }
     HAL_GPIO_Init(port, &GPIO_InitStruct);
 
     // 5. 重新启用 I2C 外设
@@ -762,7 +774,11 @@ void I2C_RecoverSCL(I2C_HandleTypeDef *hi2c , GPIO_TypeDef* port , uint16_t scl 
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;    // 复用开漏模式
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF4_I2C1; // 根据实际 I2C 外设调整
+    if(hi2c == &hi2c1) {
+        GPIO_InitStruct.Alternate = GPIO_AF4_I2C1; // 根据实际 I2C 外设调整
+    } else if(hi2c == &hi2c2) {
+        GPIO_InitStruct.Alternate = GPIO_AF4_I2C2; // 根据实际 I2C 外设调整
+    }
     HAL_GPIO_Init(port, &GPIO_InitStruct);
 
     // 6. 重新启用 I2C 外设

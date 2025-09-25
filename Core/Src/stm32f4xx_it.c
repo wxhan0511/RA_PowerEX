@@ -493,7 +493,7 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
     // 清理自定义状态变量
     first_byte_state = 1;
     offset = 0;
-
+#endif
       if (I2C_IsSDALow(hi2c,GPIOB,GPIO_PIN_6,GPIO_PIN_7)) {
         // 如果 SDA 被拉低，调用恢复函数
         I2C_RecoverSDA(hi2c,GPIOB,GPIO_PIN_6,GPIO_PIN_7);
@@ -503,7 +503,6 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
         I2C_RecoverSCL(hi2c,GPIOB,GPIO_PIN_6,GPIO_PIN_7);
       }
       MX_I2C1_Init();
-#endif
     // 重新使能侦听模式，保证从机持续响应主机
       HAL_I2C_EnableListen_IT(&hi2c1);
   }
@@ -540,7 +539,6 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
     first_byte_state = 1;
     offset = 0;
 #endif
-#if 1
     if (I2C_IsSDALow(&hi2c2,GPIOB,GPIO_PIN_10,GPIO_PIN_11)) {
       // 如果 SDA 被拉低，调用恢复函数
       I2C_RecoverSDA(&hi2c2,GPIOB,GPIO_PIN_10,GPIO_PIN_11);
@@ -551,7 +549,6 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
     }
     MX_I2C2_Init();
     // 重新使能侦听模式，保证从机持续响应主机
-#endif
     HAL_I2C_EnableListen_IT(&hi2c2);
 
   }

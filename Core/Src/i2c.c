@@ -17,6 +17,7 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
+
 /* Includes ------------------------------------------------------------------*/
 #include "i2c.h"
 
@@ -24,6 +25,7 @@
 
 /* USER CODE END 0 */
 
+/* I2C and DMA handle definitions */
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 DMA_HandleTypeDef hdma_i2c1_rx;
@@ -31,29 +33,28 @@ DMA_HandleTypeDef hdma_i2c1_tx;
 DMA_HandleTypeDef hdma_i2c2_rx;
 DMA_HandleTypeDef hdma_i2c2_tx;
 
-
-
-
-
-// 从机准备好要发送的数据时
+/**
+ * @brief Slave notifies master and sends data when ready.
+ * @param tx_buf Pointer to transmit buffer.
+ * @param len Length of data to send.
+ */
 void send_data_to_master(uint8_t* tx_buf, uint16_t len)
 {
-    // 1. 拉高PB8，通知主机有数据
+    // 1. Set PB8 high to notify master data is ready
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
 
-    // 2. 阻塞等待主机来读
+    // 2. Block and wait for master to read
     HAL_I2C_Slave_Transmit(&hi2c1, tx_buf, len, HAL_MAX_DELAY);
 
-    // 3. 发送完成后拉低PB8
+    // 3. Set PB8 low after transmission is complete
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
 }
 
 
 
-/* I2C1 init function 
-   for HS96L03W2C03
-   PB6 I2C1_SCL , PB7 I2C1_SDA
-*/
+/**
+ * @brief I2C1 initialization function (PB6: SCL, PB7: SDA)
+ */
 void MX_I2C1_Init(void)
 {
 
@@ -68,29 +69,29 @@ void MX_I2C1_Init(void)
   hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
 #ifdef I2C_MASTER
-  hi2c1.Init.OwnAddress1 = 0x0; // Master address, 0x30 is the 7-bit address
+  hi2c1.Init.OwnAddress1 = 0x0; // Master address
 #else
-  hi2c1.Init.OwnAddress1 = 0x80; // Slave address, 0xC0 is the 7-bit address
+  hi2c1.Init.OwnAddress1 = SLAVE_ADDR; // Slave address
 #endif
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.OwnAddress2 = SLAVE_ADDR1;
   hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
     Error_Handler();
   }
-#ifdef I2C_SLAVE
+#ifdef I2C_SLAVE_I2C1_IRQ_RX
   /* USER CODE BEGIN I2C1_Init 2 */
-  //HAL_I2C_EnableListen_IT(&hi2c1);       // 使能I2C1的侦听中断
+  HAL_I2C_EnableListen_IT(&hi2c1);
   /* USER CODE END I2C1_Init 2 */
 #endif
 }
-/* I2C2 init function 
-  for RA_DB
-  PB10 I2C2_SCL , PB11 I2C2_SDA
-*/
+/**
+ * @brief I2C2 initialization function (PB10: SCL, PB11: SDA)
+ *        for RA_DB
+ */
 void MX_I2C2_Init(void)
 {
 
@@ -107,23 +108,28 @@ void MX_I2C2_Init(void)
 #ifdef I2C_MASTER
   hi2c2.Init.OwnAddress1 = 0x0; // Master address, 0x30 is the 7-bit address
 #else
-  hi2c2.Init.OwnAddress1 = 0x80;//mother board define slave address
+  hi2c2.Init.OwnAddress1 = SLAVE_ADDR;//mother board define slave address
 #endif
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_ENABLE;
-  hi2c2.Init.OwnAddress2 = 0x20;
+  hi2c2.Init.OwnAddress2 = SLAVE_ADDR1;
   hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c2) != HAL_OK)
   {
     Error_Handler();
   }
+#ifdef I2C_SLAVE_I2C2_IRQ_RX
   /* USER CODE BEGIN I2C2_Init 2 */
   HAL_I2C_EnableListen_IT(&hi2c2);  
   /* USER CODE END I2C2_Init 2 */
+#endif
 
 }
-
+/**
+ * @brief I2C MSP (MCU Support Package) initialization.
+ * @param i2cHandle Pointer to I2C handle.
+ */
 void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
 {
 
@@ -185,7 +191,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     }
 
     __HAL_LINKDMA(i2cHandle,hdmatx,hdma_i2c1_tx);
-#if 0
+#ifdef I2C_SLAVE_I2C1_IRQ_RX
     /* I2C1 interrupt Init */
     HAL_NVIC_SetPriority(I2C1_EV_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
@@ -252,7 +258,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     }
 
     __HAL_LINKDMA(i2cHandle,hdmatx,hdma_i2c2_tx);
-#if 1
+#ifdef I2C_SLAVE_I2C2_IRQ_RX
     /* I2C2 interrupt Init */
     HAL_NVIC_SetPriority(I2C2_EV_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(I2C2_EV_IRQn);

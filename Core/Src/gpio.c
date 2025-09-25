@@ -65,7 +65,8 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(ADC_RESET_GPIO_Port, ADC_RESET_Pin|ADC_SPI_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PEPin PEPin PEPin PEPin */
-  GPIO_InitStruct.Pin = VCC_EN_Pin|IOVCC_EN_Pin|ELVSS_EN_Pin|SHUTDOWN;
+  GPIO_InitStruct.Pin = VCC_EN_Pin|IOVCC_EN_Pin|ELVSS_EN_Pin|SHUTDOWN|
+                        LEVEL_SHIFT_OE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
