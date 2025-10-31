@@ -16,7 +16,7 @@ extern UART_HandleTypeDef huart1;
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi2;
 extern I2C_HandleTypeDef hi2c1;
-
+extern uint8_t id;
 typedef StaticSemaphore_t osStaticMutexDef_t;
 typedef StaticQueue_t osStaticMessageQDef_t;
 
@@ -54,4 +54,5 @@ extern uint8_t hw_version[4];
 void bsp_init();
 void sel_cali_param(uint8_t ch, uint8_t type, uint8_t power, float *offset, float *gain);
 int16_t float_to_int16_round(float value);
+uint16_t float_to_uint16_round(float value);
 #endif // BSP_H

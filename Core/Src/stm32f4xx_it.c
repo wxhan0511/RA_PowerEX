@@ -28,14 +28,14 @@
 #include "i2c_utils.h"
 #include "calibration_utils.h"
 
-volatile uint8_t cmd = 0;  // Command from host computer
-int16_t power_data = 0; // Voltage or current data, in mV or mA, is sent to the host computer
-float offset, gain;
-HAL_StatusTypeDef ret = HAL_ERROR;
-float latest_sample_raw_data[8] = {0}; // Store the latest sampled raw data for 8 channel
-uint16_t latest_sample_data[8] = {0}; // Store the latest sampled data for 8 channel after conversion and calibration
-uint8_t latest_sample_index[8] = {0}; // Store the corresponding index of the latest sampled data for 8 channel
-float IV_data = 0.0f; // Voltage or current data before calibration
+// volatile uint8_t cmd = 0;  // Command from host computer
+// int16_t power_data = 0; // Voltage or current data, in mV or mA, is sent to the host computer
+// float offset, gain;
+// HAL_StatusTypeDef ret = HAL_ERROR;
+// float latest_sample_raw_data[8] = {0}; // Store the latest sampled raw data for 8 channel
+// uint16_t latest_sample_data[8] = {0}; // Store the latest sampled data for 8 channel after conversion and calibration
+// uint8_t latest_sample_index[8] = {0}; // Store the corresponding index of the latest sampled data for 8 channel
+// float IV_data = 0.0f; // Voltage or current data before calibration
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */

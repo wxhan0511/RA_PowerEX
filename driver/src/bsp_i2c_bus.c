@@ -2,30 +2,7 @@
 #include "bsp.h"
 #include "main.h"
 #include "i2c_utils.h"
-I2C_HandleTypeDef  hi2c = {0};
-
-void bsp_i2c_bus_hw_init(void *handle, uint32_t speed){
-    I2C_HandleTypeDef *i2c = (I2C_HandleTypeDef *)handle;
-    i2c->Instance = I2C2;
-    i2c->Init.ClockSpeed = speed;
-    i2c->Init.OwnAddress1 = 0;
-    i2c->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-    i2c->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-    i2c->Init.OwnAddress2 = 0;
-    i2c->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-    i2c->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-    if (HAL_I2C_DeInit(i2c) != HAL_OK)
-    {
-        GTB_DEBUG(__FILE__, __LINE__);
-    }
-    if (HAL_I2C_Init(i2c) != HAL_OK)
-    {
-        /* Initialization Error */
-        GTB_DEBUG(__FILE__, __LINE__);
-    }
-
-
-}
+#include "i2c.h"
 
 BSP_STATUS_T bsp_i2c_bus_hw_write_data(void *handle, uint8_t address, uint8_t command, const uint8_t *data, uint32_t size)
 {
@@ -90,7 +67,7 @@ BSP_STATUS_T bsp_i2c_bus_hw_read_data(void *handle, uint8_t address, uint8_t com
             I2C_RecoverSCL(handle, GPIOB, GPIO_PIN_6, GPIO_PIN_7);
         }
         __disable_irq();
-        bsp_i2c_bus_hw_init(handle,I2C_SPEED_100KHZ);
+        MX_I2C2_Init();
         __enable_irq();
     }
 #endif
@@ -120,7 +97,7 @@ BSP_STATUS_T bsp_i2c_bus_hw_read_data(void *handle, uint8_t address, uint8_t com
             I2C_RecoverSCL(handle, GPIOB, GPIO_PIN_6, GPIO_PIN_7);
         }
         __disable_irq();
-        bsp_i2c_bus_hw_init(handle,I2C_SPEED_100KHZ);
+        MX_I2C2_Init();
         __enable_irq();
     }
 #endif
@@ -135,8 +112,7 @@ BSP_STATUS_T bsp_i2c_bus_hw_read_data(void *handle, uint8_t address, uint8_t com
 }
 
 bsp_i2c_hw_t bsp_i2c_hw_ra = {
-    .handle = &hi2c,
-    .init = bsp_i2c_bus_hw_init,
+    .handle = &hi2c2,
     .read_data = bsp_i2c_bus_hw_read_data,
     .write_data = bsp_i2c_bus_hw_write_data,
 };

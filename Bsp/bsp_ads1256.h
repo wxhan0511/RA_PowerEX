@@ -20,7 +20,7 @@ extern float raw_data_queue_get_data(uint16_t index);
 extern uint8_t raw_data_queue_get_index(uint16_t index);
 
 extern volatile uint16_t raw_data_queue_head;
-
+extern float latest_sample_data[8];
 #define RAW_DATA_QUEUE_SIZE  (4092 / sizeof(float)) 
 #define RAW_DATA_INDEX_QUEUE_SIZE  4092
 

@@ -39,6 +39,15 @@ int16_t float_to_int16_round(float value) {
     }
 }
 
+uint16_t float_to_uint16_round(float value) {
+    if (value >= 0) {
+        return (uint16_t)(value + 0.5f);
+    } else {
+        return (uint16_t)(value - 0.5f);
+    }
+}
+
+
 /*
   * @brief Select calibration parameters based on channel and type
   * @param ch Channel number (0-7)

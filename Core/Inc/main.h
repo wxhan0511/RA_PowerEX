@@ -121,7 +121,12 @@ void Error_Handler(void);
 /*for power enhance board*/
 #define LEVEL_SHIFT_DAC_Pin GPIO_PIN_4
 #define LEVEL_SHIFT_DAC_GPIO_Port GPIOA
-
+//addr recongnition
+#define ADDR0 GPIO_PIN_8
+#define ADDR1 GPIO_PIN_9
+#define ADDR2 GPIO_PIN_10
+#define ADDR3 GPIO_PIN_11
+#define ADDR_RECON_PORT GPIOD
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

@@ -45,6 +45,26 @@ extern i2c_dev_t dac;
 
 typedef struct
 {
+    // VCC校准参数
+    float vcc_set_offset;          
+    float vcc_set_gain;           
+    // ELVDD校准参数
+    float elvdd_set_offset;       
+    float elvdd_set_gain; 
+    
+    // ELVSS校准参数
+    float elvss_set_offset;         
+    float elvss_set_gain;          
+
+    // IOVCC校准参数
+    float iovcc_set_offset;         
+    float iovcc_set_gain;
+    
+
+} __attribute__((packed)) da_calibration_data_t;
+
+typedef struct
+{
     i2c_dev_t *i2c_bus;
     uint8_t vref[4];      /* 4-bit reference voltage info: 1=2.048V, 0=VDD */
     uint8_t gain[4];      /* 4-bit gain info: 1=x2, 0=x1 */
@@ -53,7 +73,7 @@ typedef struct
 }dac_dev_t;
 
 extern dac_dev_t dac_dev;
-
+extern da_calibration_data_t da_calibration_data;
 void bsp_dac_init(dac_dev_t *dev);
 
 BSP_STATUS bsp_dac_single_voltage_set(dac_dev_t* dev, const uint8_t channel, const uint16_t voltage, const uint8_t en);

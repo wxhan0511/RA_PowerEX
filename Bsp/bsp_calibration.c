@@ -13,11 +13,12 @@
 #include <string.h>
 #include <stdio.h>
 #include "main.h"
+#include "bsp_mcp4728.h"
 
 /* Global variable definition */
 calibration_manager_t g_calibration_manager = {0};
 CRC_HandleTypeDef hcrc = {0};
-
+da_calibration_data_t da_calibration_data ={};
 /* Internal buffer */
 static uint8_t cal_buffer[sizeof(calibration_data_t) + 256]; // Extra space for alignment
 
@@ -189,6 +190,17 @@ HAL_StatusTypeDef calibration_set_defaults(void)
     g_calibration_manager.is_loaded = true;
     g_calibration_manager.is_valid = true;
     g_calibration_manager.last_error = CAL_ERROR_NONE;
+
+    da_calibration_data.elvdd_set_gain = -3.557;
+    da_calibration_data.elvdd_set_offset =1285;
+    da_calibration_data.elvss_set_gain = 3.557;
+    da_calibration_data.elvss_set_offset = 1285;
+    da_calibration_data.vcc_set_gain = -1.576;
+    da_calibration_data.vcc_set_offset = 5100;
+    da_calibration_data.iovcc_set_gain = -1.576;
+    da_calibration_data.iovcc_set_offset = 5100;
+
+    
     return HAL_OK;
 }
 

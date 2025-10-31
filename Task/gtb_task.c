@@ -69,11 +69,11 @@ void server_gtb(void *argument)
   uint32_t send_cnt =0;
   for (;;)
   {
-    if (send_cnt % 10 == 0)
-	{
-		CDC_Transmit_HS(test_buf,sizeof(test_buf) - 1);
-	}
-	send_cnt++;
+    // if (send_cnt % 10 == 0)
+	// {
+	// 	CDC_Transmit_HS(test_buf,sizeof(test_buf) - 1);
+	// }
+	// send_cnt++;
 #if 0
     hid_state_fs = 0;
     bsp_gtb_init(3);

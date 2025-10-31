@@ -57,6 +57,5 @@ void bsp_gtb_init(uint8_t mode){
     tp_spi_set_mode(mode);
 
     tp_spi_cs_enable(false);
-    extern bsp_i2c_hw_t bsp_i2c_hw_ra;
-    bsp_i2c_hw_ra.init(bsp_i2c_hw_ra.handle,I2C_SPEED_100KHZ);
+   
 }

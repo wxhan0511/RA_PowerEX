@@ -7,18 +7,12 @@
  * @copyright  Copyright (c) 2025 gcoreinc
  * @license    MIT License
  */
-
-/* System header files */
 #include <stdio.h>
 #include <string.h>
-
-/* HAL library and main configuration */
-#include "bsp.h"
 #include "main.h"
 #include "usart.h"
 #include "usb_device.h"
-
-/* BSP function modules */
+#include "bsp.h"
 #include "bsp_ads1256.h"
 #include "bsp_channel_sel.h"
 #include "bsp_dwt.h"
@@ -30,9 +24,10 @@
 #include "i2c.h"
 #include "bsp_i2c_bus.h"
 
-/* Tool modules */
+/* drivers */
 #include "retarget.h"
 #include "delay.h"
+#include "drv_ra_device.h"
 
 /* Private function prototypes */
 static void bsp_print_version_info(void);
@@ -41,7 +36,7 @@ static void bsp_test_spi_flash(void);
 static void bsp_init_power_control(void);
 static void bsp_init_interrupts(void);
 static void bsp_level_shift_direction_set(uint8_t dir);
-static void MVDD_VDDIO_Power_Init(void);
+static void ra_xb_Power_Init(void);
 
 /**
  * @brief Firmware name stored in specific section
@@ -68,7 +63,11 @@ __attribute__((section(".hw_version"))) uint8_t hw_version[4] = {1, 0, 0, 1};
  * @brief Magic number for firmware verification
  */
 uint8_t magic_number[4] = {0x12, 0x34, 0xf8, 0x8f};
-
+uint8_t id = 0;
+uint8_t io0 = 0;
+uint8_t io1 = 0;
+uint8_t io2 = 0;
+uint8_t io3 = 0;
 
 
 /**
@@ -93,9 +92,7 @@ void bsp_init()
     bsp_dac_init(&dac_dev);
     MX_USB_DEVICE_Init();
     //MVDD,VDDIO
-    MVDD_VDDIO_Power_Init();
-
-
+    ra_xb_Power_Init();
 
     RA_POWEREX_INFO("------------- bsp init finish -------------\r\n");
 }
@@ -130,6 +127,18 @@ static void bsp_print_version_info(void)
     RA_POWEREX_INFO("Hardware Version: %d.%d.%d.%d\r\n", 
                        hw_version[0], hw_version[1], hw_version[2], hw_version[3]);
     RA_POWEREX_INFO("================================================\r\n");
+
+    // 解析版本号,ID的4位由读IO决定
+    io0 = HAL_GPIO_ReadPin(ADDR_RECON_PORT,ADDR0);
+    io1 = HAL_GPIO_ReadPin(ADDR_RECON_PORT,ADDR1);
+    io2 = HAL_GPIO_ReadPin(ADDR_RECON_PORT,ADDR2);
+    io3 = HAL_GPIO_ReadPin(ADDR_RECON_PORT,ADDR3);
+
+    // 构造字节：将 4 个 IO 状态左移到高 4 位
+    id = (io3 << 3) | (io2 << 2) | (io1 << 1) | io0;
+    // 低 4 位清零（可选，根据需求可修改）
+    id = id << 4;
+
 }
 
 /**
@@ -228,28 +237,61 @@ static void bsp_test_spi_flash(void)
     }
 }
 
-static void MVDD_VDDIO_Power_Init(void)
+static void ra_xb_Power_Init(void)
 {   
     BSP_STATUS status;
-    uint8_t VDDIO=0x75; //5.5 , 1.8
-    status = bsp_i2c_bus_hw_write_data(&hi2c2,RA_LP3907_2_ADDRESS,0x10,&VDDIO,1);
-    //错误重发3次
-    // for (int i = 0; i < 3 && status != BSP_OK; i++) {
-    //     status = bsp_i2c_bus_hw_write_data(&hi2c2,RA_LP3907_2_ADDRESS,0x10,&VDDIO,1);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_IOVCC, 33);
+    if(status != BSP_OK){
+        printf("IOVCC set power failed\r\n");
+    }
+    //osDelay(10);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VCI, 33);
+    if(status != BSP_OK){
+        printf("VCI set power failed\r\n");
+    }
+    //osDelay(10);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VSP,33);
+    if(status != BSP_OK){
+        printf("VSP set power failed\r\n");
+    }
+    //osDelay(10);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VSN, 33);
+    if(status != BSP_OK){
+        printf("VSN set power failed\r\n");
+    }
+    //osDelay(10);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_MVDD, 12);
+    if(status != BSP_OK){
+        printf("MVDD set power failed\r\n");
+    }
+    //osDelay(10);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VDDIO, 18);
+    if(status != BSP_OK){
+        printf("VDDIO set power failed\r\n");
+    }
+    //osDelay(10);
+    ra_dev_main_0.dev->tca9554->read(RA_TCA9554_POWER_OFF,0x01,0);
+    
+
+    status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VSN,1);
+    if(status != BSP_OK){
+        printf("[drv ra ops] main 0x%x vsn power off\r\n",ra_dev_main_0.main_address);
+    }
+    status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_12V,1);
+    if(status != BSP_OK){
+        printf("[drv ra ops] main 0x%x 12v power off\r\n",ra_dev_main_0.main_address);
+    }
+    status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VSP,1);
+    if(status != BSP_OK){
+        printf("[drv ra ops] main 0x%x vsp power off\r\n",ra_dev_main_0.main_address);
+    }
+    // status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_IOVCC,1);
+    // if(status != BSP_OK){
+    //     printf("[drv ra ops] main 0x%x iovcc power off\r\n",ra_dev_main_0.main_address);
     // }
-    uint8_t temp =2;
-    status = bsp_i2c_bus_hw_write_data(&hi2c2,RA_LP3907_2_ADDRESS,RA_LP3907_2_MVDD_CMD,&temp,1);
-    // for (int i = 0; i < 3 && status != BSP_OK; i++) {
-    //     status = bsp_i2c_bus_hw_write_data(&hi2c2,RA_LP3907_2_ADDRESS,RA_LP3907_2_MVDD_CMD,&temp,1);
-    // }
-    status = bsp_i2c_bus_hw_write_data(&hi2c2,RA_LP3907_2_ADDRESS,0x10,&VDDIO,1);
-    // for (int i = 0; i < 3 && status != BSP_OK; i++) {
-    //     status = bsp_i2c_bus_hw_write_data(&hi2c2,RA_LP3907_2_ADDRESS,0x10,&VDDIO,1);
-    // }
-    uint8_t temp1 =8;
-    status = bsp_i2c_bus_hw_write_data(&hi2c2,RA_LP3907_2_ADDRESS,RA_LP3907_2_VDDIO_CMD,&temp1,1);
-    // for (int i = 0; i < 3 && status != BSP_OK; i++) {
-    //     status = bsp_i2c_bus_hw_write_data(&hi2c2,RA_LP3907_2_ADDRESS,0x10,&VDDIO,1);
+    // status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VCI,1);
+    // if(status != BSP_OK){
+    //     printf("[drv ra ops] main 0x%x vci power off\r\n",ra_dev_main_0.main_address);
     // }
 
 }

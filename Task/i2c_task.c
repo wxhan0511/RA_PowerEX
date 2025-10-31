@@ -5,7 +5,11 @@
 #include "bsp_ads1256.h"
 #include "bsp_mcp4728.h"
 #include "bsp_power.h"
-volatile float Real_time_sampling_of_current_data = 0;
+float latest_sample_data[8] = {0}; // Store the latest sampled data for 8 channel after conversion and calibration
+float latest_sample_raw_data[8] = {0}; // Store the latest sampled raw data for 8 channel
+uint8_t latest_sample_index[8] = {0}; // Store the corresponding index of the latest sampled data for 8 channel
+uint8_t channel_num = 0;
+float offset, gain, IV_data = 0.0f;
 osSemaphoreId_t i2c1Semaphore = NULL;
 
 osThreadId_t masterTxTaskHandle = NULL;
@@ -100,11 +104,7 @@ void MasterTxTask(void *argument)
 {
   OLED_Init();//OLED初始
   OLED_Clear();//清屏
-  float latest_sample_raw_data[8] = {0}; // Store the latest sampled raw data for 8 channel
-  float latest_sample_data[8] = {0}; // Store the latest sampled data for 8 channel after conversion and calibration
-  uint8_t latest_sample_index[8] = {0}; // Store the corresponding index of the latest sampled data for 8 channel
-  uint8_t channel_num = 0;
-  float offset, gain, IV_data = 0.0f;
+
   for (;;)
   {
     if (HAL_GPIO_ReadPin(ELVDD_EN_GPIO_Port , ELVDD_EN_Pin) == GPIO_PIN_RESET)
