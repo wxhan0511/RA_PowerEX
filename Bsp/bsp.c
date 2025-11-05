@@ -77,21 +77,31 @@ uint8_t io3 = 0;
  */
 void bsp_init()
 {
+    da_calibration_data.elvdd_set_gain = -3.557;
+    da_calibration_data.elvdd_set_offset =12850;
+    da_calibration_data.elvss_set_gain = 3.557;
+    da_calibration_data.elvss_set_offset = 12850;
+    da_calibration_data.vcc_set_gain = -1.576;
+    da_calibration_data.vcc_set_offset = 5100;
+    da_calibration_data.iovcc_set_gain = -1.576;
+    da_calibration_data.iovcc_set_offset = 5100;
+
     bsp_retarget_init(&huart1);
     bsp_init_dwt();
     /* Print system version information */
     bsp_print_version_info();
     MX_CRC_Init();
     // bsp_test_spi_flash();
-    calibration_set_defaults();
-    //calibration_save();
-    //calibration_load();
-    bsp_init_power_control();
+    //calibration_set_defaults();
+    calibration_load(); //如果校准值不存在则写入默认值
+    //bsp_init_power_control();
     bsp_init_adc_system();
     bsp_level_shift_direction_set(1);
     bsp_dac_init(&dac_dev);
     MX_USB_DEVICE_Init();
     ra_xb_Power_Init();
+
+
 
     RA_POWEREX_INFO("------------- bsp init finish -------------\r\n");
 }
@@ -101,8 +111,8 @@ void bsp_init()
  */
 static void bsp_init_power_control(void)
 {
-    ELVSS_ENABLE();
-    ELVDD_DISABLE();
+    ELVSS_DISABLE();
+    ELVDD_ENABLE();
     VCC_ENABLE();
     IOVCC_ENABLE();
     //On by default
@@ -237,34 +247,44 @@ static void bsp_test_spi_flash(void)
 }
 
 static void ra_xb_Power_Init(void)
-{   
+{   uint8_t temp;
     BSP_STATUS status;
-    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_IOVCC, 33);
+    //打印
+    RA_POWEREX_INFO("xb_iovcc %fmv\r\n",g_calibration_manager.data.xb_iovcc_last_voltage);
+    RA_POWEREX_INFO("vci %fmv\r\n",g_calibration_manager.data.vci_last_voltage);
+    RA_POWEREX_INFO("vsp %fmv\r\n",g_calibration_manager.data.vsp_last_voltage);
+    RA_POWEREX_INFO("vsn %fmv\r\n",g_calibration_manager.data.vsn_last_voltage);
+    //恢复上次设置的电压
+    temp = float_to_uint8_round(g_calibration_manager.data.xb_iovcc_last_voltage / 100);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_IOVCC, temp);
     if(status != BSP_OK){
         printf("IOVCC set power failed\r\n");
     }
-    //osDelay(10);
-    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VCI, 33);
+    temp = float_to_uint8_round(g_calibration_manager.data.vci_last_voltage / 100);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VCI, temp);
     if(status != BSP_OK){
         printf("VCI set power failed\r\n");
     }
-    //osDelay(10);
-    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VSP,33);
+    temp = float_to_uint8_round(g_calibration_manager.data.vsp_last_voltage / 100);
+    //status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VSP, temp);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev, RA_POWER_VSP, temp);
+
     if(status != BSP_OK){
         printf("VSP set power failed\r\n");
     }
-    //osDelay(10);
-    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VSN, 33);
+    temp = float_to_uint8_round(g_calibration_manager.data.vsn_last_voltage / 100);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VSN, temp);
+    
     if(status != BSP_OK){
         printf("VSN set power failed\r\n");
     }
     //osDelay(10);
-    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_MVDD, 12);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_MVDD, 12);//控2828
     if(status != BSP_OK){
         printf("MVDD set power failed\r\n");
     }
     //osDelay(10);
-    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VDDIO, 18);
+    status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VDDIO, 18); //控2828
     if(status != BSP_OK){
         printf("VDDIO set power failed\r\n");
     }
@@ -284,13 +304,5 @@ static void ra_xb_Power_Init(void)
     if(status != BSP_OK){
         printf("[drv ra ops] main 0x%x vsp power off\r\n",ra_dev_main_0.main_address);
     }
-    // status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_IOVCC,1);
-    // if(status != BSP_OK){
-    //     printf("[drv ra ops] main 0x%x iovcc power off\r\n",ra_dev_main_0.main_address);
-    // }
-    // status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VCI,1);
-    // if(status != BSP_OK){
-    //     printf("[drv ra ops] main 0x%x vci power off\r\n",ra_dev_main_0.main_address);
-    // }
 
 }

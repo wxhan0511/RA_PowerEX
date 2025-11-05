@@ -71,7 +71,7 @@ void server_gtb(void *argument)
 	// 	CDC_Transmit_HS(test_buf,sizeof(test_buf) - 1);
 	// }
 	// send_cnt++;
-#if 1
+#if 0
     hid_state_fs = 0;
     bsp_gtb_init(3);
     gtb_global_var_init(&tp_config_hid);

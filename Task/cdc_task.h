@@ -25,8 +25,8 @@ typedef enum{
     GET_SW_VERSION = 0x11,
     VOL_SET = 0x12,
     LIM_SET = 0x13,
-    ALL_POWER_SET = 0x14,
-    SINGLE_POWER_SET = 0x15,
+    ALL_POWER_EN = 0x14,
+    SINGLE_POWER_EN = 0x15,
     SINGLE_VOL_GET = 0x16,
     SINGLE_CUR_GET = 0x17
 }cdc_cmd_type;

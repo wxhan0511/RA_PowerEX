@@ -52,7 +52,7 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pins : PEPin PEPin PEPin PEPin */
-  GPIO_InitStruct.Pin = VCC_EN_Pin|IOVCC_EN_Pin|ELVSS_EN_Pin|SHUTDOWN|
+  GPIO_InitStruct.Pin = VCC_EN_Pin|IOVCC_EN_Pin|SHUTDOWN|
                         LEVEL_SHIFT_OE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -65,6 +65,15 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+
+  GPIO_InitStruct.Pin = ELVSS_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(ELVSS_EN_GPIO_Port, &GPIO_InitStruct);
+
+
 
   //ADS1256 DRDY pin configuration for external interrupt 1, pull-up resistor, drop-edge trigger interrupt
   /*Configure GPIO pin : PtPin */

@@ -191,14 +191,7 @@ HAL_StatusTypeDef calibration_set_defaults(void)
     g_calibration_manager.is_valid = true;
     g_calibration_manager.last_error = CAL_ERROR_NONE;
 
-    da_calibration_data.elvdd_set_gain = -3.557;
-    da_calibration_data.elvdd_set_offset =1285;
-    da_calibration_data.elvss_set_gain = 3.557;
-    da_calibration_data.elvss_set_offset = 1285;
-    da_calibration_data.vcc_set_gain = -1.576;
-    da_calibration_data.vcc_set_offset = 5100;
-    da_calibration_data.iovcc_set_gain = -1.576;
-    da_calibration_data.iovcc_set_offset = 5100;
+
 
     
     return HAL_OK;
@@ -225,15 +218,9 @@ HAL_StatusTypeDef calibration_load(void)
     if (cal->magic != CALIBRATION_MAGIC) {
         RA_POWEREX_INFO("Magic number check failed: 0x%08lX (expected: 0x%08lX)\r\n", 
                cal->magic, CALIBRATION_MAGIC);
-        
-        if (cal->magic == 0xFFFFFFFF) {
-            RA_POWEREX_INFO("   Flash area uninitialized, using default values\r\n");
-        } else if (cal->magic == 0x00000000) {
-            RA_POWEREX_INFO("   Flash area cleared, using default values\r\n");
-        } else {
-            RA_POWEREX_INFO("   Data format error, trying backup data\r\n");
-            return calibration_restore_from_backup();
-        }
+        calibration_set_defaults();
+        calibration_save();
+        calibration_load();
         
         g_calibration_manager.last_error = CAL_ERROR_MAGIC;
         return HAL_ERROR;
@@ -277,7 +264,7 @@ HAL_StatusTypeDef calibration_save(void)
     // Update timestamp and CRC
     cal->timestamp = HAL_GetTick();
     cal->crc32 = calibration_calculate_crc32((uint8_t*)cal, 
-                                            sizeof(calibration_data_t) - sizeof(uint32_t));
+                                            sizeof(calibration_data_t) - sizeof(uint32_t));//不计算CRC32字段本身
     
     // Copy data to buffer
     memcpy(cal_buffer, cal, sizeof(calibration_data_t));

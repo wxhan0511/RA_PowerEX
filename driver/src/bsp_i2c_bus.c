@@ -47,7 +47,7 @@ BSP_STATUS_T bsp_i2c_bus_hw_read_data(void *handle, uint8_t address, uint8_t com
     send_data[0] = command;
 
     status = HAL_I2C_Master_Transmit(handle, address | 0x00, send_data, 1, 1000);
-#if 1
+#if 0
     if (status == HAL_OK)
 		{
 		}   
@@ -77,7 +77,7 @@ BSP_STATUS_T bsp_i2c_bus_hw_read_data(void *handle, uint8_t address, uint8_t com
     if (status != HAL_OK)	return BSP_ERROR;
 
     status = HAL_I2C_Master_Receive(handle, address | 0x01, data, size, 1000);
-#if 1
+#if 0
     if (status == HAL_OK)
     {
     }

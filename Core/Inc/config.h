@@ -72,8 +72,8 @@
 //#define USE_OLED
 
 //only one can be defined
-// #define CDC
-#define CHID
+#define CDC
+// #define CHID
 
 
 #endif /* __CONFIG_H */

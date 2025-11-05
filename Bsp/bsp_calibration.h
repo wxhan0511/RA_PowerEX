@@ -93,6 +93,16 @@ typedef struct
     float ch7_read_v_gain;           // ch7读取电压增益校准值
     float ch7_read_c_offset;         // ch7读取电流偏移校准值
     float ch7_read_c_gain;           // ch7读取电流增益校准值
+
+    float elvss_last_voltage;       
+    float iovcc_last_voltage;       
+    float elvdd_last_voltage;
+    float vcc_last_voltage;
+    float xb_iovcc_last_voltage;
+    float vci_last_voltage;
+    float vsn_last_voltage;
+    float vsp_last_voltage;  
+
     
     uint32_t reserved[4];           // 保留字段（用于扩展）
     uint32_t crc32;                 // CRC32校验值（必须放在最后）

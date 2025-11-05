@@ -78,6 +78,11 @@ void MX_USB_DEVICE_Init(void)
     Error_Handler();
   }
 #ifdef CDC
+  /*bDeviceClass = 0x02
+    表示该设备属于 Communications Device Class (CDC)，即通信设备类，常用于 USB 虚拟串口（CDC VCP）。
+
+    bDeviceSubClass = 0x02
+    表示该设备属于 CDC 的 Abstract Control Model (ACM) 子类，专用于虚拟串口（VCP）功能。*/
   if (USBD_RegisterClass(&hUsbDeviceHS, &USBD_CDC) != USBD_OK)
   {
     Error_Handler();
@@ -96,6 +101,14 @@ void MX_USB_DEVICE_Init(void)
     Error_Handler();
   }
 #else
+  // if (USBD_RegisterClass(&hUsbDeviceHS, &USBD_COMPOSITE) != USBD_OK)
+  // {
+  //   Error_Handler();
+  // }
+  // if (USBD_Start(&hUsbDeviceHS) != USBD_OK)
+  // {
+  //   Error_Handler();
+  // }
 #endif
   if (USBD_Start(&hUsbDeviceHS) != USBD_OK)
   {

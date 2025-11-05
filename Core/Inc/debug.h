@@ -82,7 +82,7 @@ extern "C" {
     #define USB_ERROR(fmt, ...)          do {} while(0)
 #endif
 
-#define CDC_DEBUG_ENABLE
+// #define CDC_DEBUG_ENABLE
 #ifdef CDC_DEBUG_ENABLE
     #define CDC_DEBUG(fmt, ...)          printf("[CDC DEBUG] " fmt, ##__VA_ARGS__)
     #define CDC_INFO(fmt, ...)           printf("[CDC INFO] " fmt, ##__VA_ARGS__)

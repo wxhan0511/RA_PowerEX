@@ -9,7 +9,8 @@
 #include <tgmath.h>
 #include "main.h"
 #include "bsp_dwt.h"
-
+#include "bsp_calibration.h"
+#include "bsp_power.h"
 // I2C总线1设备结构体，配置I2C句柄和MCP4728器件地址
 i2c_dev_t i2c_bus_1 = {
     .handle = &hi2c1,
@@ -34,13 +35,60 @@ dac_dev_t dac_dev = {
  */
 void  bsp_dac_init(dac_dev_t *dev)
 {
-    dac_dev.val[0] = 1200; // Set default voltage for ELVDD+  7000 先不上电，cs hign 配7V
-    dac_dev.val[1] = 1500; // Set default voltage for ELVSS-    0
-    dac_dev.val[2] = -127; // Set default voltage for VCC    2700
-    dac_dev.val[3] = 1675; // Set default voltage for IOVCC  1800
-    bsp_dac_multi_voltage_set(&dac_dev); // 同时更新通道0-3的输出
+    //恢复上次设置的电压
+    BSP_STATUS status;
+    ELVDD_DISABLE();
+    ELVSS_DISABLE();
+    IOVCC_DISABLE();
+    VCC_DISABLE();
+    RA_POWEREX_INFO("ELVDD: %f mV\r\n",  g_calibration_manager.data.elvdd_last_voltage);
+    RA_POWEREX_INFO("ELVSS: %f mV\r\n",  g_calibration_manager.data.elvss_last_voltage);
+    RA_POWEREX_INFO("IOVCC: %f mV\r\n",  g_calibration_manager.data.iovcc_last_voltage);
+    RA_POWEREX_INFO("VCC: %f mV\r\n",  g_calibration_manager.data.vcc_last_voltage);
+    // 校准数据
+    g_calibration_manager.data.elvdd_last_voltage = (g_calibration_manager.data.elvdd_last_voltage - da_calibration_data.elvdd_set_offset) / (da_calibration_data.elvdd_set_gain);
+    dac_dev.val[0] = float_to_uint16_round(g_calibration_manager.data.elvdd_last_voltage);
+    status = bsp_dac_single_voltage_set(&dac_dev, 0, dac_dev.val[0], 0);
+    if (status != BSP_OK)
+    {
+        CDC_DEBUG("ELVDD set voltage failed\r\n");
+    }
+    g_calibration_manager.data.elvss_last_voltage = (g_calibration_manager.data.elvss_last_voltage - da_calibration_data.elvss_set_offset) / (da_calibration_data.elvss_set_gain);
+    dac_dev.val[1] = float_to_uint16_round(g_calibration_manager.data.elvss_last_voltage);
+    status = bsp_dac_single_voltage_set(&dac_dev, 1, dac_dev.val[1], 0);
+    if (status != BSP_OK)
+    {
+        CDC_DEBUG("ELVSS set voltage failed\r\n");
+    }
+    g_calibration_manager.data.iovcc_last_voltage = (g_calibration_manager.data.iovcc_last_voltage - da_calibration_data.iovcc_set_offset) / (da_calibration_data.iovcc_set_gain);
+    dac_dev.val[2] = float_to_uint16_round(g_calibration_manager.data.iovcc_last_voltage);
+    status = bsp_dac_single_voltage_set(&dac_dev, 2, dac_dev.val[2], 0);
+    if (status != BSP_OK)
+    {
+        CDC_DEBUG("IOVCC set voltage failed\r\n");
+    }
+    g_calibration_manager.data.vcc_last_voltage = (g_calibration_manager.data.vcc_last_voltage - da_calibration_data.vcc_set_offset) / (da_calibration_data.vcc_set_gain);
+    dac_dev.val[3] = float_to_uint16_round(g_calibration_manager.data.vcc_last_voltage);
+    status = bsp_dac_single_voltage_set(&dac_dev, 3, dac_dev.val[3], 0);
+    if (status != BSP_OK)
+    {
+        CDC_DEBUG("VCC set voltage failed\r\n");
+    }
     HAL_GPIO_WritePin(LDAC_Port, LDAC_Pin, GPIO_PIN_RESET);
-    RA_POWEREX_INFO("DAC initialized , all voltage input set 1500mv\r\n");
+    //ELVDD_ENABLE();
+    ELVSS_ENABLE();
+    IOVCC_ENABLE();
+    VCC_ENABLE();
+    CDC_DEBUG("DAC initialized , all voltage input set\r\n");
+
+
+    // dac_dev.val[0] = 1200; // Set default voltage for ELVDD+  7000 先不上电，cs hign 配7V
+    // dac_dev.val[1] = 1500; // Set default voltage for ELVSS-    0
+    // dac_dev.val[2] = -127; // Set default voltage for VCC    2700
+    // dac_dev.val[3] = 1675; // Set default voltage for IOVCC  1800
+    // bsp_dac_multi_voltage_set(&dac_dev); // 同时更新通道0-3的输出
+    // HAL_GPIO_WritePin(LDAC_Port, LDAC_Pin, GPIO_PIN_RESET);
+    // RA_POWEREX_INFO("DAC initialized , all voltage input set 1500mv\r\n");
 }
 
 /**
@@ -59,10 +107,9 @@ BSP_STATUS bsp_dac_single_voltage_set(dac_dev_t* dev, const uint8_t channel, con
     buf[0] = MCP4728_SINGLE_WRITE | (channel << 1) | en; // Command and channel
     buf[1] = dev->val[channel] >> 8 | dev->vref[channel] << 7 | dev->gain[channel] << 4 | dev->pd[channel] << 5;
     buf[2] = dev->val[channel] & 0xFF; // Lower 8 bits of the 12-bit DAC value
-
     const HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(
         dev->i2c_bus->handle, dev->i2c_bus->dev_addr, buf, 3, 1000);
-    if (status != HAL_OK)
+        if (status != HAL_OK)
     {
         printf("I2C transmit failed %d \r\n", status);
         return BSP_ERROR;

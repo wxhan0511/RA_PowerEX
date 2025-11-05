@@ -104,6 +104,8 @@ void MasterTxTask(void *argument)
 {
   OLED_Init();//OLED初始
   OLED_Clear();//清屏
+  BSP_STATUS ADJ_ELVDD_status;
+  uint8_t falling_edge_detected = 1;
 
   for (;;)
   {
@@ -111,16 +113,23 @@ void MasterTxTask(void *argument)
     {
       if (HAL_GPIO_ReadPin(TP_RESET_GPIO_Port , TP_RESET_Pin) == GPIO_PIN_RESET)
       {
-          BSP_STATUS ADJ_ELVDD_status = bsp_dac_single_voltage_set(&dac_dev, 0, dac_dev.val[0], 0);
-          if (ADJ_ELVDD_status != BSP_OK)
+          
+          if(falling_edge_detected >= 2)
           {
-              RA_POWEREX_DEBUG("bsp_dac_single_voltage_set channel 0 ELVDD failed\r\n");
+            ADJ_ELVDD_status = bsp_dac_single_voltage_set(&dac_dev, 0, dac_dev.val[0], 0);
+            if (ADJ_ELVDD_status != BSP_OK)
+            {
+                RA_POWEREX_DEBUG("bsp_dac_single_voltage_set channel 0 ELVDD failed\r\n");
+            }
+            osDelay(10);
+            RA_POWEREX_DEBUG("bsp_dac_single_voltage_set channel 0 ELVDD: %d\r\n",dac_dev.val[0]);
+            ELVDD_ENABLE(); // 重新使能ELVDD
+            HAL_GPIO_WritePin(LDAC_Port, LDAC_Pin, GPIO_PIN_RESET);
+            RA_POWEREX_DEBUG("ELVDD output enabled\r\n");
+              
           }
-          osDelay(10);
-          RA_POWEREX_DEBUG("bsp_dac_single_voltage_set channel 0 ELVDD: %d\r\n",dac_dev.val[0]);
-          ELVDD_ENABLE(); // 重新使能ELVDD
-          HAL_GPIO_WritePin(LDAC_Port, LDAC_Pin, GPIO_PIN_RESET);
-          RA_POWEREX_DEBUG("ELVDD output enabled\r\n");
+          falling_edge_detected = 2;
+          HAL_Delay(10000); // 消抖延时
       }
     }
 
