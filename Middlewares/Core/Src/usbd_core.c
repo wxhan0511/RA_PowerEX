@@ -112,7 +112,7 @@ USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev,
     pdev->pUserData[i] = NULL;
 
     /* Set class as inactive */
-    pdev->tclasslist[i].Active = 0;
+    pdev->tclasslist[i].Active = 0;//标记每个类为未激活。
     pdev->NumClasses = 0;
     pdev->classId = 0;
   }

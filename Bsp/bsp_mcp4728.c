@@ -53,8 +53,10 @@ void  bsp_dac_init(dac_dev_t *dev)
     {
         CDC_DEBUG("ELVDD set voltage failed\r\n");
     }
-    g_calibration_manager.data.elvss_last_voltage = (g_calibration_manager.data.elvss_last_voltage - da_calibration_data.elvss_set_offset) / (da_calibration_data.elvss_set_gain);
+    g_calibration_manager.data.elvss_last_voltage = (-g_calibration_manager.data.elvss_last_voltage + da_calibration_data.elvss_set_offset) / (da_calibration_data.elvss_set_gain);
+    CDC_DEBUG("ELVSS vi %f\r\n",g_calibration_manager.data.elvss_last_voltage);
     dac_dev.val[1] = float_to_uint16_round(g_calibration_manager.data.elvss_last_voltage);
+    CDC_DEBUG("ELVSS vi %d\r\n",dac_dev.val[1]);
     status = bsp_dac_single_voltage_set(&dac_dev, 1, dac_dev.val[1], 0);
     if (status != BSP_OK)
     {

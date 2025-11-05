@@ -368,8 +368,9 @@ static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
       //保存最新电压值
       g_calibration_manager.data.elvss_last_voltage = set_power_frame.value.float_value[0];
       calibration_save();
-      // 校准数据
-      set_power_frame.value.float_value[0] = (set_power_frame.value.float_value[0] - da_calibration_data.elvss_set_offset) / (da_calibration_data.elvss_set_gain);
+      // 校准数据    g_calibration_manager.data.elvss_last_voltage = (-g_calibration_manager.data.elvss_last_voltage + da_calibration_data.elvss_set_offset) / (da_calibration_data.elvss_set_gain);
+
+      set_power_frame.value.float_value[0] = (-set_power_frame.value.float_value[0] + da_calibration_data.elvss_set_offset) / (da_calibration_data.elvss_set_gain);
       dac_dev.val[1] = float_to_uint16_round(set_power_frame.value.float_value[0]);
       CDC_DEBUG("Vi:%f\r\n", set_power_frame.value.float_value[0]);
       status = bsp_dac_single_voltage_set(&dac_dev, 1, dac_dev.val[1], 0);

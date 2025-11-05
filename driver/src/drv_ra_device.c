@@ -62,7 +62,7 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
     uint8_t temp_data;
     switch (power_name) {
         case RA_POWER_VSP:
-            if((power_value < 24) || (power_value > 64))
+            if((power_value < 24) || (power_value > 84))
                 return BSP_ERROR;
             else{
                 if(power_value >= 40)

@@ -101,14 +101,11 @@ void MX_USB_DEVICE_Init(void)
     Error_Handler();
   }
 #else
-  // if (USBD_RegisterClass(&hUsbDeviceHS, &USBD_COMPOSITE) != USBD_OK)
-  // {
-  //   Error_Handler();
-  // }
-  // if (USBD_Start(&hUsbDeviceHS) != USBD_OK)
-  // {
-  //   Error_Handler();
-  // }
+  if (USBD_RegisterClass(&hUsbDeviceHS, &USBD_COMPOSITE) != USBD_OK)
+  {
+    Error_Handler();
+  }
+
 #endif
   if (USBD_Start(&hUsbDeviceHS) != USBD_OK)
   {
