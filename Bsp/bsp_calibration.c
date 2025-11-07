@@ -207,7 +207,7 @@ HAL_StatusTypeDef calibration_load(void)
     
     RA_POWEREX_INFO("Loading calibration data from Flash...\r\n");
     g_calibration_manager.load_attempts++;
-    
+	//sf_WaitForWriteEnd();
     // Read data from Flash to buffer
     bsp_flash_read(cal_buffer, CALIBRATION_MAIN_ADDR, sizeof(calibration_data_t));
     

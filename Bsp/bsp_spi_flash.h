@@ -51,7 +51,8 @@ void bsp_flash_erase_chip(void);
 uint32_t bsp_flash_read_id(void);
 void bsp_flash_read(uint8_t * p_buf, uint32_t read_addr, uint32_t read_size);
 uint8_t bsp_flash_write(uint8_t* p_buf, uint32_t write_addr, uint16_t write_size);
-
+uint8_t bsp_flash_read_status(void);
+void QSPI_FLASH_Wait_Busy(void);
 
 
 

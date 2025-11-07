@@ -292,7 +292,7 @@ static void ra_xb_Power_Init(void)
     ra_dev_main_0.dev->tca9554->read(RA_TCA9554_POWER_OFF,0x01,0);
     
 
-    status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VSN,1);
+    status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VSN,0);
     if(status != BSP_OK){
         printf("[drv ra ops] main 0x%x vsn power off\r\n",ra_dev_main_0.main_address);
     }
@@ -304,5 +304,6 @@ static void ra_xb_Power_Init(void)
     if(status != BSP_OK){
         printf("[drv ra ops] main 0x%x vsp power off\r\n",ra_dev_main_0.main_address);
     }
+    RA_POWEREX_DEBUG("VDDIO,MVDD,VSN,iovcc,VCI enabled, VSP disabled\r\n");
 
 }

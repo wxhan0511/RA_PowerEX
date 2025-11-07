@@ -41,6 +41,11 @@ void  bsp_dac_init(dac_dev_t *dev)
     ELVSS_DISABLE();
     IOVCC_DISABLE();
     VCC_DISABLE();
+    //写死电压版本---------------IOVCC=1.8V、VCC=5.3v、ELVDD=8.8v
+    // g_calibration_manager.data.iovcc_last_voltage=1800.0f;
+    // g_calibration_manager.data.vcc_last_voltage=5300.0f;
+    // g_calibration_manager.data.elvdd_last_voltage=8800.0f;
+    //---------------------------------------------
     RA_POWEREX_INFO("ELVDD: %f mV\r\n",  g_calibration_manager.data.elvdd_last_voltage);
     RA_POWEREX_INFO("ELVSS: %f mV\r\n",  g_calibration_manager.data.elvss_last_voltage);
     RA_POWEREX_INFO("IOVCC: %f mV\r\n",  g_calibration_manager.data.iovcc_last_voltage);
@@ -63,25 +68,29 @@ void  bsp_dac_init(dac_dev_t *dev)
         CDC_DEBUG("ELVSS set voltage failed\r\n");
     }
     g_calibration_manager.data.iovcc_last_voltage = (g_calibration_manager.data.iovcc_last_voltage - da_calibration_data.iovcc_set_offset) / (da_calibration_data.iovcc_set_gain);
-    dac_dev.val[2] = float_to_uint16_round(g_calibration_manager.data.iovcc_last_voltage);
-    status = bsp_dac_single_voltage_set(&dac_dev, 2, dac_dev.val[2], 0);
+    dac_dev.val[3] = float_to_uint16_round(g_calibration_manager.data.iovcc_last_voltage);
+    status = bsp_dac_single_voltage_set(&dac_dev, 3, dac_dev.val[3], 0);
     if (status != BSP_OK)
     {
         CDC_DEBUG("IOVCC set voltage failed\r\n");
     }
     g_calibration_manager.data.vcc_last_voltage = (g_calibration_manager.data.vcc_last_voltage - da_calibration_data.vcc_set_offset) / (da_calibration_data.vcc_set_gain);
-    dac_dev.val[3] = float_to_uint16_round(g_calibration_manager.data.vcc_last_voltage);
-    status = bsp_dac_single_voltage_set(&dac_dev, 3, dac_dev.val[3], 0);
+    dac_dev.val[2] = float_to_uint16_round(g_calibration_manager.data.vcc_last_voltage);
+    status = bsp_dac_single_voltage_set(&dac_dev, 2, dac_dev.val[2], 0);
     if (status != BSP_OK)
     {
         CDC_DEBUG("VCC set voltage failed\r\n");
     }
     HAL_GPIO_WritePin(LDAC_Port, LDAC_Pin, GPIO_PIN_RESET);
+    //写死电压版本---------------IOVCC=1.8V、VCC=5.3v、ELVDD=8.8v
+    // ELVDD_ENABLE();
+    //------------------------------------
     //ELVDD_ENABLE();
-    ELVSS_ENABLE();
+    //ELVSS_ENABLE();
     IOVCC_ENABLE();
     VCC_ENABLE();
-    CDC_DEBUG("DAC initialized , all voltage input set\r\n");
+    CDC_DEBUG("IOVCC and VCC enabled\r\n");
+    CDC_DEBUG("ELVDD and ELVSS disabled\r\n");
 
 
     // dac_dev.val[0] = 1200; // Set default voltage for ELVDD+  7000 先不上电，cs hign 配7V

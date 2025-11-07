@@ -185,6 +185,27 @@ void sf_PageWrite(uint8_t * _pBuf, uint32_t _uiWriteAddr, uint16_t _usSize)
     //printf("[spi flash] write protect %d\r\n",status);
     sf_WaitForWriteEnd();
 }
+//读取SPI Flash的状态寄存器
+uint8_t bsp_flash_read_status(void)
+{
+    uint8_t status;
+    //uint8_t g_spiTxBuf[4],g_spiRxBuf[4];
+    SF_CS_L();									
+    g_spiTxBuf[0] = (CMD_RDSR);								
+    bsp_spiTransfer(g_spiTxBuf, g_spiRxBuf, 2);
+    status = g_spiRxBuf[1];					
+    SF_CS_H();									 
+    //printf("[spi flash] read status %d\r\n",status);
+    return status;
+}
+void QSPI_FLASH_Wait_Busy(void)
+{
+	volatile uint32_t _reg;
+	while(1){
+		_reg = bsp_flash_read_status();
+		if((_reg & 0x0101)==0) break;
+	}
+}
 /**
  * @brief 从SPI Flash读取数据
  * @param p_buf     读取数据缓冲区
@@ -204,7 +225,7 @@ void bsp_flash_read(uint8_t * p_buf, uint32_t read_addr, uint32_t read_size)
     {
         return;
     }
-
+    QSPI_FLASH_Wait_Busy();
     SF_CS_L();
     g_spiLen = 0;
     g_spiTxBuf[g_spiLen++] = (CMD_READ);

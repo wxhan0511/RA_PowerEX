@@ -23,7 +23,7 @@
 #include "i2c_task.h"
 #include "gtb_task.h"
 #include "led_task.h"
-
+#include "power_task.h"
 /* Private function prototypes -----------------------------------------------*/
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -47,6 +47,7 @@ void MX_FREERTOS_Init(void)
   master_tx_task_init();
   master_rx_task_init();
 #endif
+  power_task_init();
 }
 
 
