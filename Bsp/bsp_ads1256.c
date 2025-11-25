@@ -473,7 +473,10 @@ void bsp_ads1256_irq_handle(ads1256_dev_t* handle)
         {   
             const double raw_data = handle->data_buffer_avg[handle->last_channel]*ADC_RATIO*0.000001;
             //printf("channel %d raw data %f \r\n",handle->last_channel,raw_data);
-            raw_data_queue_push(raw_data , handle->last_channel);   //push data and index(corresponding channel) to ring queue
+            if(raw_data != 0.0)
+            {
+                raw_data_queue_push(raw_data , handle->last_channel);   //push data and index(corresponding channel) to ring queue
+            }
             //AD_DATA_DEBUG("channel %d raw data %f \r\n",handle->last_channel,raw_data);
 
             //const double compare = bsp_adc_vol_convert_64pin(handle->vol_gear,raw_data,handle->single_vol_cali_en);

@@ -204,7 +204,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
     /* USER CODE BEGIN SPI2_MspInit 1 */
-
+    //TODO: Add SPI2 DMA and interrupt initialization if needed
     /* USER CODE END SPI2_MspInit 1 */
   }
   else if(spiHandle->Instance==SPI3)

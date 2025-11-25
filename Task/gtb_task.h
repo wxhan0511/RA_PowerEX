@@ -19,18 +19,20 @@ extern "C" {
 #include "cmsis_os2.h"
 #include "usbd_def.h"
 /* Exported types ------------------------------------------------------------*/
-extern osThreadId_t thread_id_gtb;
-extern const osThreadAttr_t server_gtb_attr;
-extern uint8_t hid_state_fs;
-extern uint8_t USB_Recive_Buffer[64];
-// Declare the external USB device handle
-extern USBD_HandleTypeDef hUsbDeviceHS;
+
 /* Exported constants --------------------------------------------------------*/
 
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions prototypes ---------------------------------------------*/
 
+/* 用户自定义变量声明 */
+extern osThreadId_t thread_id_gtb;
+extern const osThreadAttr_t server_gtb_attr;
+extern uint8_t hid_state_fs;
+extern uint8_t get_data_fs[64];
+extern uint8_t send_data_fs[64];    
+extern USBD_HandleTypeDef hUsbDeviceFS;
 #ifdef __cplusplus
 }
 #endif

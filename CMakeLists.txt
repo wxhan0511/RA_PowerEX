@@ -49,7 +49,7 @@ else ()
 endif ()
 
 include_directories(Core/Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include Middlewares/Third_Party/FreeRTOS/Source/include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F)
-include_directories(Middlewares/Core/Inc Middlewares/CustomHID/Inc Middlewares/CDC/Inc Middlewares/CompositeBuilder/Inc)
+include_directories(Middlewares/Core/Inc Middlewares/HID/Inc Middlewares/CDC/Inc)
 include_directories(USB_DEVICE/App USB_DEVICE/Target)
 include_directories(Bsp Task utils gtb/inc driver/inc)
 include_directories(${CMAKE_SOURCE_DIR}/inc ${CMAKE_SOURCE_DIR}/src)
