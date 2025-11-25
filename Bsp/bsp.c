@@ -91,6 +91,12 @@ void bsp_init()
     /* Print system version information */
     bsp_print_version_info();
     MX_CRC_Init();
+    uint32_t id =0;
+    for(uint8_t i = 0;i<100;i++)
+    {
+        id=bsp_flash_read_id();
+        printf("Flash ID: %X\r\n",id);
+    }
     // bsp_test_spi_flash();
     //calibration_set_defaults();
     calibration_load(); //如果校准值不存在则写入默认值

@@ -1,8 +1,202 @@
-#include "bsp_gtb.h"
+//
+// Created by Bobby on 2023/4/25.
+//
+#include "stdio.h"
+#include <string.h>
+#include "gtb_op.h"
 #include "tp_define.h"
-
-
+#include "bsp_gtb.h"
+#include <stdlib.h>
+//uint8_t TouchData_Demo_RawData[MAXTOUCHDATASIZE];
+extern tp_config_t tp_config;
 extern uint8_t dynamic_cmd[MAXCMDCOUNT][MAXCMDSIZE];
+
+int32_t gtb_read_coordination_dynamic(tp_config_t *tp_config,uint8_t* read_data)
+{
+    uint8_t cmddata[MAXCMDSIZE];
+    uint16_t cmdLength;
+    uint8_t *pCmd;
+    int32_t status;
+    uint8_t pCmd2;
+    for(uint8_t i = 0;i < tp_config->dynamic_total_cmd_num;i++)
+    {
+        cmdLength = dynamic_cmd[i][3] << 8;
+        cmdLength |= dynamic_cmd[i][4];
+        switch(dynamic_cmd[i][2])
+        {
+            case DYNAMIC_WRITE:
+                for(uint8_t j = 0;j < cmdLength;j++)
+                {
+                    if(j > (MAXCMDSIZE - 1))
+                        break;
+                    cmddata[j] = dynamic_cmd[i][j + 5];
+                }
+                status = gtb_write_data(tp_config,tp_config->interface_mode,cmddata,cmdLength);
+                if(status != HAL_OK)
+                    return status;
+                break;
+            case DYNAMIC_READ:
+                status = gtb_read_data(tp_config,tp_config->interface_mode,&pCmd2,read_data,cmdLength);
+                if(status != HAL_OK)
+                    return status;
+                break;
+            case DYNAMIC_DELAY:      
+//                if(dynamic_cmd[i][12] == 1)
+//                    delay_ms(dynamic_cmd[i][13]);
+//                else if(dynamic_cmd[i][12] == 0)
+//                    delay_us(dynamic_cmd[i][13]);
+                break;
+            default:
+                break;
+        }
+    }
+
+    return HAL_OK;
+}
+//extern uint8_t TouchData_Demo_RawData[MAXTOUCHDATASIZE];
+//================================GC==================================//
+extern uint8_t touch_data_demo_raw_data[MAXTOUCHDATASIZE];
+extern tp_config_t tp_config_hid;
+int32_t  gtb_read_raw_data_gc(bool interface,uint8_t ic_type_index,uint16_t len)
+{
+    int32_t status = 0;
+
+    if(interface == I2C_MODE){
+        
+        //status = I2C1_ReadData(TouchData_Demo_RawData,len);
+        i2c_read_data(tp_config_hid.i2c_slave_address,touch_data_demo_raw_data,len);
+    }
+    else //if(interface == SPI_MODE)
+    {
+        uint8_t *pVoid = NULL;
+        //printf("read raw %d %d \r\n",ic_type_index,len);
+        if((ic_type_index == IC_INDEX_GC_7271) && (len > 1024))
+        {
+            tp_spi_cs_enable(true);
+            //delay_us(10);
+            status = spi_read_write_data1(pVoid, &touch_data_demo_raw_data[0], 1024, 0);
+
+            if(status != HAL_OK)
+                return status;
+
+            tp_spi_cs_enable(false);
+            //osDelay(1);
+            tp_spi_cs_enable(true);
+            status = spi_read_write_data1(pVoid, &touch_data_demo_raw_data[1024], len - 1024, 0);
+            //delay_us(10);
+            tp_spi_cs_enable(false);
+        }
+        else
+        {
+            tp_spi_cs_enable(true);
+            //delay_us(10);
+            //status = spi_read_data2(touch_data_demo_raw_data, len);
+            status = spi_read_write_data3(pVoid, touch_data_demo_raw_data, len, 0);
+            tp_spi_cs_enable(false);
+
+        }
+    }
+    return status;
+}
+
+uint16_t gtb_get_demo_data_len(uint8_t ic_type_index)
+{
+    uint16_t datalength;
+    datalength = 0;
+    switch(ic_type_index & 0x0f)
+    {
+        case IC_TYPE_GC:
+            datalength = 65;
+            break;
+    }
+    return datalength;
+}
+
+uint16_t gtb_get_debug_data_index(uint8_t ic_type_index)
+{
+    uint16_t datalength;
+    datalength = 0;
+    switch(ic_type_index & 0x0f)
+    {
+        case IC_TYPE_GC:
+            datalength = 0;
+            break;
+    }
+    return datalength;
+}
+
+int32_t gtb_read_raw_data(tp_config_t *tp_config,bool interface,uint8_t ic_type_index,uint16_t len)
+{
+    int32_t status = 0;
+    if(len > MAXTOUCHDATASIZE)
+        len = MAXTOUCHDATASIZE;
+    switch(tp_config->ic_type_index & 0x0f)
+    {
+        case IC_TYPE_GC:
+            status = gtb_read_raw_data_gc(interface,ic_type_index,len);
+            break;
+        default:
+            break;
+    }
+    return status;
+}
+
+void gtb_read_debug_data(tp_config_t *tp_config,bool interface,uint8_t ic_type_index,uint16_t len)
+{
+    if(len > MAXTOUCHDATASIZE)
+        len = MAXTOUCHDATASIZE;
+    switch(ic_type_index & 0x0f)
+    {
+        case IC_TYPE_GC:
+
+            break;
+        default:
+            break;
+    }
+}
+
+void fw_mode_switch(tp_config_t *tp_config,uint8_t ic_type_index,bool interface,uint8_t mode)
+{
+    uint8_t cmd1[1];
+    switch(ic_type_index & 0x0f)
+    {
+        case IC_TYPE_GC:
+#if false
+            switch((tp_config->ic_type_index & 0xf0) >> 4)
+			{
+				case IC_INDEX_GC_7271:
+					if(interface == I2C_MODE)
+					{
+
+					}
+					else
+					{
+
+					}
+					break;
+				case IC_INDEX_GC_7371:
+					if(interface == I2C_MODE)
+					{
+						cmd1[0] = 0x95;
+						I2C1_WriteReg_GC(0x0020,cmd1,1);
+						I2C1_WriteReg_GC(0x0026,&mode,1);
+					}
+					else
+					{
+						cmd1[0] = 0x95;
+						SPI2_WriteReg_GC(0x0020,cmd1,1);
+						SPI2_WriteReg_GC(0x0026,&mode,1);
+				}
+					break;
+				default:
+					break;
+			}
+#endif
+            break;
+        default:
+            break;
+    }
+}
 //gloable variables initial
 void gtb_global_var_init(tp_config_t *tp_config)
 {
@@ -60,4 +254,6 @@ void gtb_global_var_init(tp_config_t *tp_config)
 //    memset(SPI_Buffer_Rx,0,sizeof(SPI_Buffer_Rx));
 //    memset(gCOMBuf_TX,0,sizeof(gCOMBuf_TX));
 //    memset(gCOMBuf_RX,0,sizeof(gCOMBuf_RX));
+
 }
+

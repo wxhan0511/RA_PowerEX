@@ -27,7 +27,7 @@
 #include "bsp_power.h"
 #include "i2c_utils.h"
 #include "calibration_utils.h"
-
+#include "bsp_gtb.h"
 // volatile uint8_t cmd = 0;  // Command from host computer
 // int16_t power_data = 0; // Voltage or current data, in mV or mA, is sent to the host computer
 // float offset, gain;
@@ -89,8 +89,8 @@ extern DMA_HandleTypeDef hdma_usart1_tx;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim6;
 
-extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
-
+extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
+extern tp_config_t tp_config_hid;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -649,13 +649,14 @@ void I2C2_ER_IRQHandler(void)
 }
 void OTG_HS_IRQHandler(void)
 {
-  /* USER CODE BEGIN OTG_HS_IRQn 0 */
+  /* USER CODE BEGIN OTG_FS_IRQn 0 */
 
-  /* USER CODE END OTG_HS_IRQn 0 */
-  HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
-  /* USER CODE BEGIN OTG_HS_IRQn 1 */
+  /* USER CODE END OTG_FS_IRQn 0 */
+  
+  HAL_PCD_IRQHandler(&hpcd_USB_OTG_FS);
+  /* USER CODE BEGIN OTG_FS_IRQn 1 */
 
-  /* USER CODE END OTG_HS_IRQn 1 */
+  /* USER CODE END OTG_FS_IRQn 1 */
 }
 // 电压电流采样回调函数
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -728,6 +729,78 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 #elif BSP_CUR_WORK
     // bsp_ads1256_irq_handle(&dev_cur);
 #endif
+  }
+  //for GTB //TODO：
+  if (GPIO_Pin == GPIO_PIN_1)
+  {
+    if((tp_config_hid.transfer_flag == false) && (tp_config_hid.int_trans == true))
+      {
+          //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
+          tp_config_hid.int_flag = true;
+          //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_RESET);
+          //osEventFlagsSet(event_Flags1_ID,0x01U<<1);  /* ??��Test_Flags????flag0 */
+      }
+
+
+
+#if DEBUG_LIYI == 1
+    if (test_flag == 1)
+    {
+        bsp_DelayMS(1);
+        uint8_t data[4] = {0xFF,0xA3,0x00,0x00};
+        uint8_t ret_data[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        SSD_SEND_array(0X01, 2, (uint8_t*)&data);
+        uint8_t ret = 0;
+        ret = SSD_READ_ACK_Report_HS(0x01,0x14,1,&ret_data[0]);
+        printf("ret %d \r\n",ret);
+        SSD_READ_ACK_Report_HS(0x01,0x15,1,&ret_data[0]);
+        SSD_READ_ACK_Report_HS(0x01,0x16,1,&ret_data[2]);
+        SSD_READ_ACK_Report_HS(0x01,0x17,1,&ret_data[4]);
+        SSD_READ_ACK_Report_HS(0x01,0x18,1,&ret_data[6]);
+        SSD_READ_ACK_Report_HS(0x01,0x19,1,&ret_data[8]);
+        SSD_READ_ACK_Report_HS(0x01,0x1a,1,&ret_data[10]);
+        SSD_READ_ACK_Report_HS(0x01,0x1b,1,&ret_data[12]);
+        for (uint8_t i = 0; i < 8; i++)
+            printf("0x%x ",ret_data[2*i+1]);
+        printf("\r\n");
+        set_lcd_clock_freq(89*2, 0);
+        test_flag = 0;
+    }
+#endif
+
+    //printf("te signal \r\n");
+   // master_state.int_change_img_flag = 1;
+
+//    if(master_state.int_change_img_flag == 1){
+//        //printf("---\r\n");
+//        tp_spi_cs_enable(false);
+//        bsp_DelayUS(delay_num);
+//        show_next_image(&image_status);
+//        master_state.int_change_img_flag = 0;
+//        tp_spi_cs_enable(true);
+//    }
+		
+		
+//    if(master_state.img_run_state == IMG_INT_MODE){
+//        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, exit_state);
+////        tp_spi_cs_enable(exit_state);
+////        exit_state = ~ exit_state;
+//        show_next_image(&master_status,&image_status);
+////        tp_spi_cs_enable(true);
+
+//        exit_state = ~exit_state;
+//    }else if(master_state.img_run_state == IMG_SINGLE_INT_MODE){
+//        //printf("1111111111111\r\n");
+//        //if(master_state.int_change_img_flag == 1)
+//        {
+//            show_next_image(&master_status,&image_status);
+//            image_trigger_mode(0);
+//            //master_state.img_run_state = IMG_TRANSFER_END;
+//            printf("1111111111111\r\n");
+//        }
+//    }
+
+    
   }
 }
 

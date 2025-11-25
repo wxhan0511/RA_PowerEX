@@ -29,7 +29,7 @@
 #include "bsp_power.h"       //powen en or disen
 #include "bsp_calibration.h" //calibration data
 #include "calibration_utils.h"
-
+#include "usbd_composite.h"
 /*ra xb*/
 #include "drv_ra_device.h"
 /* USER CODE BEGIN INCLUDE */
@@ -110,10 +110,10 @@ float_bytes_t float_bytes;
 /* Create buffer for reception and transmission           */
 /* It's up to user to redefine and/or remove those define */
 /** Received data over USB are stored in this buffer      */
-uint8_t UserRxBufferHS[APP_RX_DATA_SIZE];
+uint8_t UserRxBufferFS[APP_RX_DATA_SIZE];
 
 /** Data to send over USB CDC are stored in this buffer   */
-uint8_t UserTxBufferHS[APP_TX_DATA_SIZE];
+uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
 
@@ -128,7 +128,7 @@ uint8_t UserTxBufferHS[APP_TX_DATA_SIZE];
  * @{
  */
 
-extern USBD_HandleTypeDef hUsbDeviceHS;
+extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 
@@ -143,11 +143,11 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
  * @{
  */
 
-static int8_t CDC_Init_HS(void);
-static int8_t CDC_DeInit_HS(void);
-static int8_t CDC_Control_HS(uint8_t cmd, uint8_t *pbuf, uint16_t length);
-static int8_t CDC_Receive_HS(uint8_t *pbuf, uint32_t *Len);
-static int8_t CDC_TransmitCplt_HS(uint8_t *pbuf, uint32_t *Len, uint8_t epnum);
+static int8_t CDC_Init_FS(void);
+static int8_t CDC_DeInit_FS(void);
+static int8_t CDC_Control_FS(uint8_t cmd, uint8_t *pbuf, uint16_t length);
+static int8_t CDC_Receive_FS(uint8_t *pbuf, uint32_t *Len);
+static int8_t CDC_TransmitCplt_FS(uint8_t *pbuf, uint32_t *Len, uint8_t epnum);
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_DECLARATION */
 
@@ -157,26 +157,27 @@ static int8_t CDC_TransmitCplt_HS(uint8_t *pbuf, uint32_t *Len, uint8_t epnum);
  * @}
  */
 
-USBD_CDC_ItfTypeDef USBD_Interface_fops_HS =
-    {
-        CDC_Init_HS,
-        CDC_DeInit_HS,
-        CDC_Control_HS,
-        CDC_Receive_HS,
-        CDC_TransmitCplt_HS};
+USBD_CDC_ItfTypeDef USBD_CDC_Interface_fops_FS =
+{
+  CDC_Init_FS,
+  CDC_DeInit_FS,
+  CDC_Control_FS,
+  CDC_Receive_FS,
+  CDC_TransmitCplt_FS
+};
 
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief  Initializes the CDC media low layer over the USB HS IP
+ * @brief  Initializes the CDC media low layer over the USB FS IP
  * @retval USBD_OK if all operations are OK else USBD_FAIL
  */
-static int8_t CDC_Init_HS(void)
+static int8_t CDC_Init_FS(void)
 {
   /* USER CODE BEGIN 8 */
   /* Set Application Buffers */
-  USBD_CDC_SetTxBuffer(&hUsbDeviceHS, UserTxBufferHS, 0);
-  USBD_CDC_SetRxBuffer(&hUsbDeviceHS, UserRxBufferHS);
+  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
   return (USBD_OK);
   /* USER CODE END 8 */
 }
@@ -186,7 +187,7 @@ static int8_t CDC_Init_HS(void)
  * @param  None
  * @retval USBD_OK if all operations are OK else USBD_FAIL
  */
-static int8_t CDC_DeInit_HS(void)
+static int8_t CDC_DeInit_FS(void)
 {
   /* USER CODE BEGIN 9 */
   return (USBD_OK);
@@ -200,7 +201,7 @@ static int8_t CDC_DeInit_HS(void)
  * @param  length: Number of data to be sent (in bytes)
  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
  */
-static int8_t CDC_Control_HS(uint8_t cmd, uint8_t *pbuf, uint16_t length)
+static int8_t CDC_Control_FS(uint8_t cmd, uint8_t *pbuf, uint16_t length)
 {
   /* USER CODE BEGIN 10 */
   switch (cmd)
@@ -281,7 +282,7 @@ static int8_t CDC_Control_HS(uint8_t cmd, uint8_t *pbuf, uint16_t length)
  * @param  Len: Number of data received (in bytes)
  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAILL
  */
-static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
+static int8_t CDC_Receive_FS(uint8_t *Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 11 */
   // 定义变量
@@ -877,18 +878,34 @@ static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
     if (Buf[2] == MCP4728_CHANNEL_A)
     {
       memcpy(&cdc_tx_buf[3], &latest_sample_data[AD_I_ELVDD], 4);
+      if(latest_sample_data[AD_I_ELVDD]==0.0f)
+      {
+        printf("AD_I_ELVDD cur too low,%f\r\n",latest_sample_data[AD_I_ELVDD]);
+      }
     }
     if (Buf[2] == MCP4728_CHANNEL_B)
     {
       memcpy(&cdc_tx_buf[3], &latest_sample_data[AD_I_ELVSS], 4);
+      if(latest_sample_data[AD_I_ELVSS]==0.0f)
+      {
+        printf("AD_I_ELVSS cur too low,%f\r\n",latest_sample_data[AD_I_ELVSS]);
+      }
     }
     if (Buf[2] == MCP4728_CHANNEL_C)
     {
       memcpy(&cdc_tx_buf[3], &latest_sample_data[AD_I_VCC], 4);
+      if(latest_sample_data[AD_I_VCC]==0.0f)
+      {
+        printf("AD_I_VCC cur too low,%f\r\n",latest_sample_data[AD_I_VCC]);
+      }
     }
     if (Buf[2] == MCP4728_CHANNEL_D)
     {
       memcpy(&cdc_tx_buf[3], &latest_sample_data[AD_I_IOVCC], 4);
+      if(latest_sample_data[AD_I_IOVCC]==0.0f)
+      {
+        printf("AD_I_IOVCC cur too low,%f\r\n",latest_sample_data[AD_I_IOVCC]);
+      }
     }
     if (Buf[2] == 4) // IOVCC
     {
@@ -903,6 +920,10 @@ static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
         temp_double_data = (temp_data >> 3) * 0.040 / (RA_INA3221_resistor);
         temp_float_data = abs((float)temp_double_data);
         memcpy(&cdc_tx_buf[3], &temp_float_data, 4);
+        if(temp_float_data<2.0f)
+        {
+          //printf("RA XB IOVCC cur too low,%f\r\n",temp_float_data);
+        }
       }
     }
     if (Buf[2] == 5) // VCi
@@ -918,6 +939,10 @@ static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
         temp_double_data = (temp_data >> 3) * 0.040 / (RA_INA3221_resistor);
         temp_float_data = (float)temp_double_data;
         memcpy(&cdc_tx_buf[3], &temp_float_data, 4);
+        if(temp_float_data<2.0f)
+        {
+          //printf("RA XB VCI cur too low,%f\r\n",temp_float_data);
+        }
       }
     }
     if (Buf[2] == 6) // VSP
@@ -933,6 +958,10 @@ static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
         temp_double_data = (temp_data >> 3) * 0.040 / (RA_INA3221_resistor);
         temp_float_data = (float)temp_double_data;
         memcpy(&cdc_tx_buf[3], &temp_float_data, 4);
+        if(temp_float_data<2.0f)
+        {
+          //printf("RA XB VSP cur too low,%f\r\n",temp_float_data);
+        }
       }
     }
     if (Buf[2] == 7) // VSN
@@ -947,6 +976,10 @@ static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
         temp_double_data = (((uint16_t)temp_data) & 0x0fff) * 8.05664 / (RA_ADC121_resistor) / 100;
         temp_float_data = (float)temp_double_data;
         memcpy(&cdc_tx_buf[3], &temp_float_data, 4);
+        if(temp_float_data<2.0f)
+        {
+          //printf("RA XB VSN cur too low,%f\r\n",temp_float_data);
+        }
       }
     }
     cdc_tx_buf[2] = id;
@@ -968,13 +1001,13 @@ static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
   }
 #endif
   // CDC_Transmit_HS(Buf, *Len);
-  CDC_Transmit_HS(cdc_tx_buf, sizeof(cdc_tx_buf));
+  CDC_Transmit_FS(cdc_tx_buf, sizeof(cdc_tx_buf));
   /*作用：设置 USB CDC 接收缓冲区地址，为下一次接收数据做准备。
   说明：每次接收完成后都要重新设置接收缓冲区，否则无法继续接收新的数据。*/
-  USBD_CDC_SetRxBuffer(&hUsbDeviceHS, &Buf[0]);
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   /*作用：使能 USB CDC 接收功能，准备接收主机发来的下一包数据。
   说明：这一步是 CDC 协议的标准流程，必须调用，否则不会继续接收数据。*/
-  USBD_CDC_ReceivePacket(&hUsbDeviceHS);
+  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
   /* USER CODE END 11 */
 }
@@ -986,24 +1019,23 @@ static int8_t CDC_Receive_HS(uint8_t *Buf, uint32_t *Len)
  * @param  Len: Number of data to be sent (in bytes)
  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
  */
-uint8_t CDC_Transmit_HS(uint8_t *Buf, uint16_t Len)
+uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 {
   uint8_t result = USBD_OK;
-  /* USER CODE BEGIN 12 */
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)hUsbDeviceHS.pClassData;
-  if (hcdc->TxState != 0)
-  {
+  /* USER CODE BEGIN 7 */
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)pCDCData;//(USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
+  if (hcdc->TxState != 0){
     return USBD_BUSY;
   }
-
-  USBD_CDC_SetTxBuffer(&hUsbDeviceHS, Buf, Len);
-  result = USBD_CDC_TransmitPacket(&hUsbDeviceHS);
-  /* USER CODE END 12 */
+  hUsbDeviceFS.pClassData=pCDCData;
+  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
+  result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
+  /* USER CODE END 7 */
   return result;
 }
 
 /**
- * @brief  CDC_TransmitCplt_HS
+ * @brief  CDC_TransmitCplt_FS
  *         Data transmitted callback
  *
  *         @note
@@ -1014,7 +1046,7 @@ uint8_t CDC_Transmit_HS(uint8_t *Buf, uint16_t Len)
  * @param  Len: Number of data received (in bytes)
  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
  */
-static int8_t CDC_TransmitCplt_HS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
+static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 {
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 14 */

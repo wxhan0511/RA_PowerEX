@@ -457,7 +457,7 @@ uint8_t bsp_flash_write(uint8_t* p_buf, uint32_t write_addr, uint16_t write_size
     count = Flash_SectorSize - Addr;
     NumOfPage =  write_size / Flash_SectorSize;
     NumOfSingle = write_size % Flash_SectorSize;
-
+    QSPI_FLASH_Wait_Busy();
     //printf("[spi flash] write: addr=0x%08lX, size=%u, Addr=%u, count=%u, NumOfPage=%u, NumOfSingle=%u\r\n",
     //    write_addr, write_size, Addr, count, NumOfPage, NumOfSingle);
     if (Addr == 0)

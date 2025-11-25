@@ -74,11 +74,37 @@ typedef struct{
 
 /* Exported functions prototypes ---------------------------------------------*/
 
-#ifdef __cplusplus
-}
-#endif
-void  tp_spi_set_mode(uint8_t mode);
+void tp_spi_set_speed(uint8_t speed);
+
+void tp_spi_set_mode(uint8_t mode);
+
+void tp_i2c_set_speed(uint8_t speed);
+
 void bsp_gtb_init(uint8_t mode);
+
+HAL_StatusTypeDef spi_read_write_data1( uint8_t *write_data, uint8_t *read_data,
+                                        uint16_t read_size,uint16_t write_size);
+HAL_StatusTypeDef spi_read_write_data2( uint8_t *write_data, uint8_t *read_data,
+                                        uint16_t read_size,uint16_t write_size);
+HAL_StatusTypeDef spi_read_write_data3( uint8_t *write_data, uint8_t *read_data,
+                                        uint16_t read_size,uint16_t write_size);
+
+HAL_StatusTypeDef spi_read_data2( uint8_t *read_data,uint16_t read_size);
+
+HAL_StatusTypeDef tp_spi_read_write_byte(uint8_t byte);
+
 void tp_spi_cs_enable(bool state);
+
+HAL_StatusTypeDef gtb_write_data(tp_config_t *tp_config,bool mode,uint8_t *pData,uint32_t data_len);
+
+HAL_StatusTypeDef gtb_read_data(tp_config_t *tp_config,bool mode,uint8_t *read_cmd,uint8_t *read_data,uint32_t data_len);
+
+void ex_ti_initial(tp_config_t *tp_config,FunctionalState state);
+
+HAL_StatusTypeDef i2c_write_data(uint8_t slave_address,uint8_t *write_data,uint16_t write_size);
+
+HAL_StatusTypeDef i2c_read_data(uint8_t slave_address,uint8_t *read_data,uint16_t read_size);
+
+void tp_int_mode_change(uint8_t mode);
 #endif /* __BSP_GTB_H */
 
