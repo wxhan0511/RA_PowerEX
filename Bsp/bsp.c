@@ -29,6 +29,9 @@
 #include "delay.h"
 #include "drv_ra_device.h"
 
+/*usb driver*/
+#include "usb_otg.h"
+
 /* Private function prototypes */
 static void bsp_print_version_info(void);
 static HAL_StatusTypeDef bsp_init_adc_system(void);
@@ -77,33 +80,19 @@ uint8_t io3 = 0;
  */
 void bsp_init()
 {
-    da_calibration_data.elvdd_set_gain = -3.557;
-    da_calibration_data.elvdd_set_offset =12850;
-    da_calibration_data.elvss_set_gain = 3.557;
-    da_calibration_data.elvss_set_offset = 12850;
-    da_calibration_data.vcc_set_gain = -1.576;
-    da_calibration_data.vcc_set_offset = 5100;
-    da_calibration_data.iovcc_set_gain = -1.576;
-    da_calibration_data.iovcc_set_offset = 5100;
 
     bsp_retarget_init(&huart1);
     bsp_init_dwt();
     /* Print system version information */
     bsp_print_version_info();
     MX_CRC_Init();
-    uint32_t id =0;
-    for(uint8_t i = 0;i<100;i++)
-    {
-        id=bsp_flash_read_id();
-        printf("Flash ID: %X\r\n",id);
-    }
-    // bsp_test_spi_flash();
-    //calibration_set_defaults();
-    calibration_load(); //如果校准值不存在则写入默认值
-    //bsp_init_power_control();
+    // bsp_test_spi_flash();  //for test flash
+    calibration_load(); //If the calibration value does not exist, write the default value
+    //bsp_init_power_control();  //initialize power switch , Not set temporarily, restore the previous switch state and voltage value
     bsp_init_adc_system();
     bsp_level_shift_direction_set(1);
     bsp_dac_init(&dac_dev);
+    MX_USB_OTG_HS_PCD_Init();
     MX_USB_DEVICE_Init();
     ra_xb_Power_Init();
 

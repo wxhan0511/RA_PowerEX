@@ -51,14 +51,14 @@ void  bsp_dac_init(dac_dev_t *dev)
     RA_POWEREX_INFO("IOVCC: %f mV\r\n",  g_calibration_manager.data.iovcc_last_voltage);
     RA_POWEREX_INFO("VCC: %f mV\r\n",  g_calibration_manager.data.vcc_last_voltage);
     // 校准数据
-    g_calibration_manager.data.elvdd_last_voltage = (g_calibration_manager.data.elvdd_last_voltage - da_calibration_data.elvdd_set_offset) / (da_calibration_data.elvdd_set_gain);
+    g_calibration_manager.data.elvdd_last_voltage = (g_calibration_manager.data.elvdd_last_voltage - g_calibration_manager.data.da_data.elvdd_set_offset) / (g_calibration_manager.data.da_data.elvdd_set_gain);
     dac_dev.val[0] = float_to_uint16_round(g_calibration_manager.data.elvdd_last_voltage);
     status = bsp_dac_single_voltage_set(&dac_dev, 0, dac_dev.val[0], 0);
     if (status != BSP_OK)
     {
         CDC_DEBUG("ELVDD set voltage failed\r\n");
     }
-    g_calibration_manager.data.elvss_last_voltage = (-g_calibration_manager.data.elvss_last_voltage + da_calibration_data.elvss_set_offset) / (da_calibration_data.elvss_set_gain);
+    g_calibration_manager.data.elvss_last_voltage = (-g_calibration_manager.data.elvss_last_voltage + g_calibration_manager.data.da_data.elvss_set_offset) / (g_calibration_manager.data.da_data.elvss_set_gain);
     CDC_DEBUG("ELVSS vi %f\r\n",g_calibration_manager.data.elvss_last_voltage);
     dac_dev.val[1] = float_to_uint16_round(g_calibration_manager.data.elvss_last_voltage);
     CDC_DEBUG("ELVSS vi %d\r\n",dac_dev.val[1]);
@@ -67,14 +67,14 @@ void  bsp_dac_init(dac_dev_t *dev)
     {
         CDC_DEBUG("ELVSS set voltage failed\r\n");
     }
-    g_calibration_manager.data.iovcc_last_voltage = (g_calibration_manager.data.iovcc_last_voltage - da_calibration_data.iovcc_set_offset) / (da_calibration_data.iovcc_set_gain);
+    g_calibration_manager.data.iovcc_last_voltage = (g_calibration_manager.data.iovcc_last_voltage - g_calibration_manager.data.da_data.iovcc_set_offset) / (g_calibration_manager.data.da_data.iovcc_set_gain);
     dac_dev.val[3] = float_to_uint16_round(g_calibration_manager.data.iovcc_last_voltage);
     status = bsp_dac_single_voltage_set(&dac_dev, 3, dac_dev.val[3], 0);
     if (status != BSP_OK)
     {
         CDC_DEBUG("IOVCC set voltage failed\r\n");
     }
-    g_calibration_manager.data.vcc_last_voltage = (g_calibration_manager.data.vcc_last_voltage - da_calibration_data.vcc_set_offset) / (da_calibration_data.vcc_set_gain);
+    g_calibration_manager.data.vcc_last_voltage = (g_calibration_manager.data.vcc_last_voltage - g_calibration_manager.data.da_data.vcc_set_offset) / (g_calibration_manager.data.da_data.vcc_set_gain);
     dac_dev.val[2] = float_to_uint16_round(g_calibration_manager.data.vcc_last_voltage);
     status = bsp_dac_single_voltage_set(&dac_dev, 2, dac_dev.val[2], 0);
     if (status != BSP_OK)

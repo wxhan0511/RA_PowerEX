@@ -7,6 +7,7 @@
 
 #include <bsp.h>
 #include <bsp_i2c.h>
+#include "bsp_mcp4728.h" //for da_calibration_data_t
 
 /* Commands and Modes */
 #define MCP4728_GENERAL_RESET           0x06
@@ -73,7 +74,6 @@ typedef struct
 }dac_dev_t;
 
 extern dac_dev_t dac_dev;
-extern da_calibration_data_t da_calibration_data;
 void bsp_dac_init(dac_dev_t *dev);
 
 BSP_STATUS bsp_dac_single_voltage_set(dac_dev_t* dev, const uint8_t channel, const uint16_t voltage, const uint8_t en);
