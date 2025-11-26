@@ -48,14 +48,18 @@ else ()
     add_compile_options(-Og -g)
 endif ()
 
-include_directories(Core/Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include Middlewares/Third_Party/FreeRTOS/Source/include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F)
-include_directories(Middlewares/Core/Inc Middlewares/HID/Inc Middlewares/CDC/Inc)
-include_directories(USB_DEVICE/App USB_DEVICE/Target)
+include_directories(Core/Inc) 
+include_directories(Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include)
+include_directories(Middlewares/Third_Party/FreeRTOS/Source/include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F)
+include_directories(Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Inc Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App)
+include_directories(Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/CDC_ACM/Inc Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/COMPOSITE/Inc)
+include_directories(Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/HID_CUSTOM/Inc Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Target)
+include_directories(Composite)
 include_directories(Bsp Task utils gtb/inc driver/inc)
 include_directories(${CMAKE_SOURCE_DIR}/inc ${CMAKE_SOURCE_DIR}/src)
 add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F407xx)
 
-file(GLOB_RECURSE SOURCES "Core/*.*" "USB_DEVICE/*.*" "Middlewares/*.*" "Drivers/*.*" "Bsp/*.*" "Task/*.*" "utils/*.*" "gtb/*.*" "driver/*.*")
+file(GLOB_RECURSE SOURCES "Core/*.*" "Composite/*.*" "Middlewares/*.*" "Drivers/*.*" "Bsp/*.*" "Task/*.*" "utils/*.*" "gtb/*.*" "driver/*.*")
 
 
 add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)

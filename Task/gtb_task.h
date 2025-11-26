@@ -32,7 +32,6 @@ extern const osThreadAttr_t server_gtb_attr;
 extern uint8_t hid_state_fs;
 extern uint8_t get_data_fs[64];
 extern uint8_t send_data_fs[64];    
-extern USBD_HandleTypeDef hUsbDeviceFS;
 #ifdef __cplusplus
 }
 #endif

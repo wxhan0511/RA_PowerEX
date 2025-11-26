@@ -6,13 +6,13 @@
 #include "gtb_op.h"
 #include "gtb_flash_op.h"
 #include "stdio.h"
-#include "usbd_hid.h"
-#include "usbd_cdc_if.h"
+#include "usbd_hid_custom.h"
+#include "usbd_cdc_acm_if.h"
 #include "usb_device.h"
 #include "gtb_op.h"
 typedef struct _ _;
 const uint16_t GTBVersion = 0x1027;
-extern USBD_HandleTypeDef hUsbDeviceFS;
+extern USBD_HandleTypeDef hUsbDevice;
 
 // tp_config_t tp_config;
 uint8_t gtb_io_level = 0;
@@ -40,14 +40,14 @@ uint8_t gtb_fs_transmit(uint8_t *hid_data, uint32_t len, uint8_t com_mode)
     {
         //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
         //status = USBD_HID_GetReportTrigger(0U, 0U, hid_data, len);
-        status = USBD_HID_SendReport(&hUsbDeviceFS, hid_data, len);
+        status = USBD_CUSTOM_HID_SendReport(&hUsbDevice, hid_data, len);
         //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_RESET);
     }
     else if (GTB_CDC == com_mode)
     {
         //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
         //status = USBD_CDC_ACM_WriteData(0, hid_data, len);
-        status = CDC_Transmit_FS(hid_data, len);
+        status = CDC_Transmit(0, hid_data, len);
         //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_RESET);
     }
     return status;

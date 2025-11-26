@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "bsp_spi_flash.h"
-
+#include "bsp_mcp4728.h"
 /* 校准数据魔数和版本 */
 #define CALIBRATION_MAGIC           0x505745FF  // "PWEC" - Power Enhancement Calibration
 #define CALIBRATION_VERSION         1
@@ -102,7 +102,7 @@ typedef struct
     float vci_last_voltage;
     float vsn_last_voltage;
     float vsp_last_voltage;  
-
+    da_calibration_data_t da_data;  // DA校准数据
     
     uint32_t reserved[4];           // 保留字段（用于扩展）
     uint32_t crc32;                 // CRC32校验值（必须放在最后）

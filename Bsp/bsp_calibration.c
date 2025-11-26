@@ -13,12 +13,12 @@
 #include <string.h>
 #include <stdio.h>
 #include "main.h"
-#include "bsp_mcp4728.h"
+
 
 /* Global variable definition */
 calibration_manager_t g_calibration_manager = {0};
 CRC_HandleTypeDef hcrc = {0};
-da_calibration_data_t da_calibration_data ={};
+
 /* Internal buffer */
 static uint8_t cal_buffer[sizeof(calibration_data_t) + 256]; // Extra space for alignment
 
@@ -112,7 +112,7 @@ HAL_StatusTypeDef calibration_flash_init(void)
 HAL_StatusTypeDef calibration_set_defaults(void)
 {
     calibration_data_t *cal = &g_calibration_manager.data;
-
+    
     RA_POWEREX_INFO("Setting default calibration values...\r\n");
 
     // Clear the structure
@@ -179,6 +179,14 @@ HAL_StatusTypeDef calibration_set_defaults(void)
     cal->ch7_read_c_offset = -527.0f;
     cal->ch7_read_c_gain = 1.0f;
 
+    cal->da_data.elvdd_set_gain = -3.557;
+    cal->da_data.elvdd_set_offset =12850;
+    cal->da_data.elvss_set_gain = 3.557;
+    cal->da_data.elvss_set_offset = 12850;
+    cal->da_data.vcc_set_gain = -1.576;
+    cal->da_data.vcc_set_offset = 5100;
+    cal->da_data.iovcc_set_gain = -1.576;
+    cal->da_data.iovcc_set_offset = 5100;
     // Clear reserved fields
     memset(cal->reserved, 0, sizeof(cal->reserved));
 
