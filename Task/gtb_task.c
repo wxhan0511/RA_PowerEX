@@ -39,7 +39,7 @@ const osThreadAttr_t server_gtb_attr = {
     .priority = (osPriority_t)osPriorityNormal,
 };
 osThreadId_t thread_id_gtb;
-
+bool hid_state_fs = 0;
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -73,64 +73,36 @@ void server_gtb(void *argument)
     osTimerStart(led_timerHandle, 1000);
 #endif
     GTB_INFO("[gtb task] active \r\n");
-    uint32_t send_cnt = 0;
-    uint8_t test_data[64] = {1,0,1,0,1,0,1,0};
+    //uint32_t send_cnt = 0;
+    //uint8_t test_data[64] = {1,0,1,0,1,0,1,0};
+    //USBD_CUSTOM_HID_SendReport(&hUsbDevice, test_data, 64);
+    //CDC_Transmit(0,test_data, sizeof(test_data));
+    hid_state_fs = 0;
+    bsp_gtb_init(3);
+    gtb_global_var_init(&tp_config_hid);
+    ex_ti_initial(&tp_config_hid, DISABLE);
+    __IO uint8_t com_mode = GTB_HID;
     for (;;)
     {
-        //USBD_CUSTOM_HID_SendReport(&hUsbDevice, test_data, 64);
-	    //CDC_Transmit(0,test_data, sizeof(test_data));
-        HAL_Delay(10);
-        //打印收到的USB数据
-        // 假设 get_data_fs 是接收缓冲区，长度为 64
-        // hid_state_fs = 0;
-        // bsp_gtb_init(3);
-        // gtb_global_var_init(&tp_config_hid);
-        // ex_ti_initial(&tp_config_hid, DISABLE);
-        // __IO uint8_t com_mode = GTB_HID;
 
-        // if (hUsbDevice.dev_state != USBD_STATE_CONFIGURED)
-        // {
-        //     osDelay(100);
-        //     continue;
-        // }
-        // else
-        // {
-        //     gtb_fw_mode_com(&tp_config_hid, send_data_fs, get_data_fs, GTB_HID);
-        //     // USBD_HID_SendReport(&hUsbDeviceFS, send_data_fs, 64);
-        //     if (0x40 == send_data_fs[0])
-        //     {
-        //         if (0xfa == send_data_fs[1] && 0x38 != send_data_fs[7])
-        //         {
-        //             printf("[master]");
-        //             for (uint8_t i=0;i<16;i++)
-        //                 printf("0x%x ",send_data_fs[i]);
-        //             printf("\r\n");
-        //         }
 
-        //         gtb_generic_com(&tp_config_hid, send_data_fs, get_data_fs, GTB_HID);
-        //     }
-        //     // else if(0x50 == send_data_fs[0]){
-        //     //     switch (send_data_fs[1]) {
-        //     //         case GTB_HID:
-        //     //             com_mode = GTB_HID;
-        //     //             break;
-        //     //         case GTB_CDC:
-        //     //             com_mode = GTB_CDC;
-        //     //             break;
-        //     //         case GTB_MIX:
-        //     //             com_mode = GTB_MIX;
-        //     //             break;
-        //     //     }
-        //     // }
-        //     // else if(0x60 == send_data_fs[0]){
-        //     //     ex_ti_initial(&tp_config_hid,DISABLE);
-        //     // }
-        //     // else if(0xc0 == send_data_fs[0]){
-        //     //     master_state.cmd_ret_id = USB_FS;
-        //     //     command_c0_handle(&master_state,send_data_fs);
-        //     // }
-        //     hid_state_fs = 0;
-        // }
+        if (hUsbDevice.dev_state != USBD_STATE_CONFIGURED)
+        {
+            osDelay(100);
+            continue;
+        }
+        else
+        {
+            gtb_fw_mode_com(&tp_config_hid, send_data_fs, get_data_fs, GTB_HID);
+            if (hid_state_fs)
+            {
+                if (0x40 == send_data_fs[0])
+                {   GTB_DEBUG("receive HID DATA:%x,%x,%x,%x, enter gtb_generic_com\r\n",send_data_fs[0],send_data_fs[1],send_data_fs[2],send_data_fs[3]);
+                    gtb_generic_com(&tp_config_hid, send_data_fs, get_data_fs, GTB_HID);
+                }
+                hid_state_fs = 0;
+            }
+        }
         osDelay(100);
     }
 }

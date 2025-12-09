@@ -18,6 +18,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "cmsis_os2.h"
 #include "usbd_def.h"
+#include <stdbool.h>
 /* Exported types ------------------------------------------------------------*/
 
 /* Exported constants --------------------------------------------------------*/
@@ -29,9 +30,9 @@ extern "C" {
 /* 用户自定义变量声明 */
 extern osThreadId_t thread_id_gtb;
 extern const osThreadAttr_t server_gtb_attr;
-extern uint8_t hid_state_fs;
 extern uint8_t get_data_fs[64];
-extern uint8_t send_data_fs[64];    
+extern uint8_t send_data_fs[64];  
+extern bool hid_state_fs;
 #ifdef __cplusplus
 }
 #endif

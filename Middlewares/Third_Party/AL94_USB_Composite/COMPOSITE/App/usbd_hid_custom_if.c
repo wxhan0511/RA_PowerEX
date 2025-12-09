@@ -49,7 +49,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_hid_custom_if.h"
-
+#include "stdbool.h"
 /* USER CODE BEGIN INCLUDE */
 
 /* USER CODE END INCLUDE */
@@ -61,6 +61,8 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 uint8_t buffer[0x40];
+extern bool hid_state_fs;
+extern uint8_t send_data_fs[64]; 
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -220,13 +222,15 @@ static int8_t CUSTOM_HID_OutEvent(uint8_t event_idx, uint8_t state)
   //memcpy(buffer, state, 0x40);
   USBD_CUSTOM_HID_HandleTypeDef *hhid =(USBD_CUSTOM_HID_HandleTypeDef *)hUsbDevice.pClassData_HID_Custom;
   uint32_t usb_recv_len =USBD_GetRxCount(&hUsbDevice,CUSTOM_HID_OUT_EP);
-  printf("hhid->Report_buf:");
-  for(uint8_t i=0;i<64;i++)
+  USB_DEBUG("HOST->DEVICE:");
+  for(uint8_t i=0;i<16;i++)
   {
-    printf("%x",hhid->Report_buf[i]);
+    USB_DEBUG("%x,",hhid->Report_buf[i]);
+    send_data_fs[i]=hhid->Report_buf[i];
   }
-  printf("\r\n");
+  USB_DEBUG("\r\n");
 
+  hid_state_fs = 1;
   //USBD_CUSTOM_HID_SendReport(&hUsbDevice, (uint8_t *)buffer, 0x40);
 
   return (USBD_OK);

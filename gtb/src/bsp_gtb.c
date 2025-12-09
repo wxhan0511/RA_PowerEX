@@ -102,9 +102,15 @@ HAL_StatusTypeDef spi_read_write_data2( uint8_t *write_data, uint8_t *read_data,
 {
     HAL_StatusTypeDef status = HAL_OK;
     status = HAL_SPI_TransmitReceive_IT(&hspi_tp,write_data,read_data,write_size+read_size);
+    //status = HAL_SPI_TransmitReceive(&hspi_tp,write_data,read_data,write_size+read_size,1000);
+    GTB_DEBUG("spi_read_write_data2 status(HAL_OK:0): %d\r\n",status);
     if (status != HAL_OK)
-        printf("[error] gtb read write irq %d \r\n",status);
-    while(spi_rx_tx_flag == 0) {}
+        GTB_INFO("[error] gtb read write irq %d \r\n",status);
+    while(spi_rx_tx_flag == 0) 
+    {
+        GTB_INFO("[wait] spi_rx_tx_flag == 0\r\n");
+        HAL_Delay(10);
+    }
     spi_rx_tx_flag = 0;
     return status;
 }
@@ -263,17 +269,18 @@ HAL_StatusTypeDef gtb_write_data(tp_config_t *tp_config,bool mode,uint8_t *pData
     else
     {
 
-        // printf("    [gtb write] (%d)",data_len);
-        // if (data_len != 56)
-        // {
-        //     for (uint8_t i=0;i<data_len;i++)
-        //         printf("0x%x ",pData[i]);
-        // }
-        // printf("\r\n");
+        printf("    [gtb write] (%d)",data_len);
+        if (data_len != 56)
+        {
+            for (uint8_t i=0;i<data_len;i++)
+                printf("0x%x ",pData[i]);
+        }
+        printf("\r\n");
         if (tp_config->cs_high_en == true)
         {
             tp_config->transfer_flag = true;
             tp_spi_cs_enable(true);
+            GTB_DEBUG("CS Enable\r\n");
         }
         if(data_len > MAXI2CSPIBUFFERSIZE)
             return HAL_ERROR;

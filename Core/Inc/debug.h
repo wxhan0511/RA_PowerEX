@@ -47,7 +47,7 @@ extern "C" {
 #endif
 #define GTB_DEBUG_ENABLE
 #ifdef GTB_DEBUG_ENABLE
-    #define GTB_DEBUG(fmt, ...)          printf("[GTB DEBUG] " fmt, ##__VA_ARGS__)
+    #define GTB_DEBUG(fmt, ...)          printf(fmt, ##__VA_ARGS__)
     #define GTB_INFO(fmt, ...)           printf("[GTB INFO] " fmt, ##__VA_ARGS__)
 #else
     #define GTB_DEBUG(fmt, ...)          do {} while(0)
@@ -71,9 +71,9 @@ extern "C" {
     #define AD_DATA_INFO(fmt, ...)       do {} while(0)
 #endif
 
-#define USB_DEBUG_ENABLE
+//#define USB_DEBUG_ENABLE
 #ifdef USB_DEBUG_ENABLE
-    #define USB_DEBUG(fmt, ...)          printf("[USB DEBUG] " fmt, ##__VA_ARGS__)
+    #define USB_DEBUG(fmt, ...)          printf(fmt, ##__VA_ARGS__)
     #define USB_INFO(fmt, ...)           printf("[USB INFO] " fmt, ##__VA_ARGS__)
     #define USB_ERROR(fmt, ...)          printf("[USB ERROR] " fmt, ##__VA_ARGS__)
 #else
@@ -83,7 +83,7 @@ extern "C" {
 #endif
 // #define CDC_DEBUG_ENABLE
 #ifdef CDC_DEBUG_ENABLE
-    #define CDC_DEBUG(fmt, ...)          printf("[CDC DEBUG] " fmt, ##__VA_ARGS__)
+    #define CDC_DEBUG(fmt, ...)          printf( fmt, ##__VA_ARGS__)
     #define CDC_INFO(fmt, ...)           printf("[CDC INFO] " fmt, ##__VA_ARGS__)
     #define CDC_ERROR(fmt, ...)          printf("[CDC ERROR] " fmt, ##__VA_ARGS__)
 #else

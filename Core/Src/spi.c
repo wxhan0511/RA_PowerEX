@@ -189,22 +189,30 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     PC2     ------> SPI2_MISO
     PC3     ------> SPI2_MOSI
     */
-    GPIO_InitStruct.Pin = TSPI_CS_Pin|TSPI_CLK_Pin;
+    GPIO_InitStruct.Pin = TSPI_CS_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP; 
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    HAL_GPIO_Init(TSPI_CS_GPIO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = TSPI_CLK_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP; 
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(TSPI_CLK_GPIO_Port, &GPIO_InitStruct);
 
     GPIO_InitStruct.Pin = TSPI_MISO_Pin|TSPI_MOSI_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
+    HAL_GPIO_Init(TSPI_MISO_GPIO_Port, &GPIO_InitStruct);
+    printf("---------------------------------------------------\r\n");
     /* USER CODE BEGIN SPI2_MspInit 1 */
-    //TODO: Add SPI2 DMA and interrupt initialization if needed
+    //TODO: Add SPI2 DMA initialization if needed
+    HAL_NVIC_SetPriority(SPI2_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(SPI2_IRQn);
     /* USER CODE END SPI2_MspInit 1 */
   }
   else if(spiHandle->Instance==SPI3)

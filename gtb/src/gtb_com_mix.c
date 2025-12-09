@@ -161,6 +161,8 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
     switch (arg[1])
     {
         case CMD_RESET_FLOW: // reset GTB FW flow
+            printf("file: %s, line: %d\r\n", __FILE__, __LINE__);
+            GTB_DEBUG("gtb_generic_com cmd: %x\r\n",arg[1]);
             if (arg[2] == 0xff) {
                 gtb_global_var_init(tp_config);
                 //                //HW_Initial();
@@ -170,7 +172,8 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
             }
             break;
         case CMD_READ_GTB_VERSION: // get GTB FW version
-            output[0] = arg[0];
+            printf("file: %s, line: %d\r\n", __FILE__, __LINE__);
+            GTB_DEBUG("gtb_generic_com cmd: %x\r\n",arg[1]);            output[0] = arg[0];
             output[1] = arg[1];
             output[2] = (GTBVersion >> 12) & 0x0f;
             output[3] = (GTBVersion >> 8) & 0x0f;
@@ -181,7 +184,8 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
             gtb_fs_transmit(output, 64, com_mode);
             break;
         case CMD_READ_GTB_ID: // get GTB id
-            output[0] = arg[0];
+            printf("file: %s, line: %d\r\n", __FILE__, __LINE__);
+            GTB_DEBUG("gtb_generic_com cmd: %x\r\n",arg[1]);            output[0] = arg[0];
             output[1] = arg[1];
             output[2] = 0x01;
             for (int i = 3; i < MAXUSBPACKETSIZE; i++)
@@ -421,15 +425,27 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                             }
                             if (tp_config->long_packet_enable == true)
                             {
+                                GTB_DEBUG("long packet enable\r\n");
+                                GTB_DEBUG("i2c_spi_long_packet_tx_buffer:\r\n");
+                                for(int i = 0; i < 4; i++)
+                                {
+                                    GTB_DEBUG("%x, ",i2c_spi_long_packet_rx_buffer[i]);
+                                }
+                                GTB_DEBUG("\r\n");
+                                GTB_DEBUG("long_packet_count: %d\r\n",tp_config->long_packet_count);
+                                GTB_DEBUG("tp_config->interface_mode(1:SPI MODE):%x\r\n",tp_config->interface_mode);
+
                                 tp_config->long_packet_enable = false;
                                 tp_config->transfer_status = gtb_write_data(tp_config,tp_config->interface_mode, i2c_spi_long_packet_tx_buffer,
                                                                             tp_config->long_packet_count);
+
+                                GTB_DEBUG("tp_config->transfer_status(HAL_OK:0): %d\r\n", tp_config->transfer_status);                                            
                                 if (tp_config->transfer_status != HAL_OK)
                                 {
                                     send_error_code(tp_config->interface_mode, output, tp_config->transfer_status, com_mode);
                                     break;
                                 }
-                                else if (tp_config->transfer_feedback_enable == true)
+                                else if (tp_config->transfer_feedback_enable == true)//前一次收到主机发的40，fc，02,01后才会进入这里
                                     send_usb_trans_status(tp_config->interface_mode, output, CMD_USB_TRANSFER_OK, com_mode);
                                 if (arg[2] == CMD_FLASH_OPERATION_LONG_PACKET)
                                 {
