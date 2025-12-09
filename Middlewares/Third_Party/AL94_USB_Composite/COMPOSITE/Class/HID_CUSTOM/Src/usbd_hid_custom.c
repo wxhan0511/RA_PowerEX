@@ -592,6 +592,12 @@ uint8_t USBD_CUSTOM_HID_SendReport(USBD_HandleTypeDef *pdev,
   {
     if (hhid->state == CUSTOM_HID_IDLE)
     {
+      USB_DEBUG("DEVICE->HOST:");
+      for(uint16_t i = 0U; i < 8; i++)
+      {
+        USB_DEBUG("%x,", report[i]);
+      }
+      USB_DEBUG("\r\n");
       hhid->state = CUSTOM_HID_BUSY;
       (void)USBD_LL_Transmit(pdev, CUSTOM_HID_IN_EP, report, len);
     }
@@ -685,6 +691,12 @@ static uint8_t USBD_CUSTOM_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
   /* USB data will be immediately processed, this allow next USB traffic being
   NAKed till the end of the application processing */
   ((USBD_CUSTOM_HID_ItfTypeDef *)pdev->pUserData_HID_Custom)->OutEvent(hhid->Report_buf[0], hhid->Report_buf[1]);
+
+  // 关键：重新准备下一次接收（否则只能收一次）
+  USBD_LL_PrepareReceive(pdev,
+                           CUSTOM_HID_OUT_EP,                 // 与你的 GetRxCount 使用的端点一致
+                           hhid->Report_buf,
+                           USBD_CUSTOMHID_OUTREPORT_BUF_SIZE);
 
   return (uint8_t)USBD_OK;
 }

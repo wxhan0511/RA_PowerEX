@@ -91,6 +91,8 @@ extern TIM_HandleTypeDef htim6;
 
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 extern tp_config_t tp_config_hid;
+
+extern volatile int spi_rx_tx_flag;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -647,6 +649,16 @@ void I2C2_ER_IRQHandler(void)
 {
   HAL_I2C_ErrorCallback(&hi2c2);
 }
+/*used for gtb_task*/
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+     if(hspi->Instance == SPI2){
+         spi_rx_tx_flag = 1;
+         GTB_INFO("spi_rx_tx_flag set 1\r\n");
+     }
+
+}
+
 /**
   * @brief This function handles USB On The Go HS End Point 1 Out global interrupt.
   */

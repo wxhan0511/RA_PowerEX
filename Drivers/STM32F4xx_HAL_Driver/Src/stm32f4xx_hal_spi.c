@@ -198,7 +198,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-
+#include "stdio.h"
 /** @addtogroup STM32F4xx_HAL_Driver
   * @{
   */
@@ -481,7 +481,9 @@ HAL_StatusTypeDef HAL_SPI_DeInit(SPI_HandleTypeDef *hspi)
 __weak void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 {
   /* Prevent unused argument(s) compilation warning */
+  printf("HAL_SPI_MspInit not implemented\n");
   UNUSED(hspi);
+  
 
   /* NOTE : This function should not be modified, when the callback is needed,
             the HAL_SPI_MspInit should be implemented in the user file

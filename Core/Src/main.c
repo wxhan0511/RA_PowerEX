@@ -58,7 +58,6 @@
 unsigned char get_data_fs[1024] = {0}; //USB接收缓存
 unsigned char send_data_fs[64] = {0}; //USB发送缓存
 unsigned char USB_Received_Count = 0;//USB接收数据计数
-uint8_t hid_state_fs = 0; // USB HID状态
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
