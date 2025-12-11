@@ -687,17 +687,18 @@ static uint8_t USBD_CUSTOM_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
   }
 
   hhid = (USBD_CUSTOM_HID_HandleTypeDef *)pdev->pClassData_HID_Custom;
-
+  TIME_DEBUG("USB1: %lu ms\r\n", dwt_get_ms());
   /* USB data will be immediately processed, this allow next USB traffic being
   NAKed till the end of the application processing */
   ((USBD_CUSTOM_HID_ItfTypeDef *)pdev->pUserData_HID_Custom)->OutEvent(hhid->Report_buf[0], hhid->Report_buf[1]);
-
+  TIME_DEBUG("USB2: %lu ms\r\n", dwt_get_ms());
   // 关键：重新准备下一次接收（否则只能收一次）
   USBD_LL_PrepareReceive(pdev,
                            CUSTOM_HID_OUT_EP,                 // 与你的 GetRxCount 使用的端点一致
                            hhid->Report_buf,
                            USBD_CUSTOMHID_OUTREPORT_BUF_SIZE);
-
+  
+  TIME_DEBUG("USB5: %lu ms\r\n", dwt_get_ms());
   return (uint8_t)USBD_OK;
 }
 

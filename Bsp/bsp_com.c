@@ -8,7 +8,7 @@
 
 uint8_t meter_rx_buf[64];
 uint8_t meter_tx_buf[64];
-
+extern SPI_HandleTypeDef hspi_tp;
 __IO uint8_t meter_com_flag = 0;
 
 __IO METER_COM_MODE meter_com_mode = METER_CMD_MODE;
@@ -37,7 +37,7 @@ void bsp_meter_com_init(void)
 
 void bsp_meter_com_tx_rx(uint8_t* tx, uint8_t* rx, const uint16_t len, const uint8_t wait_flag)
 {
-    const HAL_StatusTypeDef ret = HAL_SPI_TransmitReceive_DMA(&hspi2, tx, rx, len);
+    const HAL_StatusTypeDef ret = HAL_SPI_TransmitReceive_DMA(&hspi_tp, tx, rx, len);
     if (ret != HAL_OK)
     {
         printf("meter spi rx tx error %d\r\n", ret);

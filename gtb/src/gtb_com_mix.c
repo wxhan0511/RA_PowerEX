@@ -10,6 +10,7 @@
 #include "usbd_cdc_acm_if.h"
 #include "usb_device.h"
 #include "gtb_op.h"
+#include "bsp_dwt.h"
 typedef struct _ _;
 const uint16_t GTBVersion = 0x1027;
 extern USBD_HandleTypeDef hUsbDevice;
@@ -95,8 +96,9 @@ void send_usb_trans_status(bool mode, uint8_t *output, uint8_t status, uint8_t c
     {
         output[i] = 0;
     }
-
+    GTB_DEBUG("start %d\r\n",HAL_GetTick());
     gtb_fs_transmit(output, 64, com_mode);
+    GTB_DEBUG("end %d\r\n",HAL_GetTick());
 }
 
 // send FSPI program status to tool
@@ -117,6 +119,7 @@ void send_usb_trans_status_fspi(bool mode, uint8_t *output, uint16_t count, uint
 
 void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8_t com_mode)
 {
+    //printf("gtb_generic_com cmd: %x,%x,%x,%x,%x,%x,%x\r\n",arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6]);
     if (arg[3] == CMD_I2CSPI_TRANSFER_HOSTDOWNLOAD) // hostdownoad and IDM
     {
         ex_ti_initial(tp_config,ENABLE);
@@ -173,6 +176,7 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
             break;
         case CMD_READ_GTB_VERSION: // get GTB FW version
             printf("file: %s, line: %d\r\n", __FILE__, __LINE__);
+            TIME_DEBUG("ver: %lu \r\n", dwt_get_ms());
             GTB_DEBUG("gtb_generic_com cmd: %x\r\n",arg[1]);            output[0] = arg[0];
             output[1] = arg[1];
             output[2] = (GTBVersion >> 12) & 0x0f;
@@ -181,7 +185,9 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
             output[5] = GTBVersion & 0x0f;
             for (int i = 6; i < MAXUSBPACKETSIZE; i++)
                 output[i] = 0;
+            TIME_DEBUG("ver: %lu \r\n", dwt_get_ms());
             gtb_fs_transmit(output, 64, com_mode);
+            TIME_DEBUG("verend: %lu \r\n", dwt_get_ms());
             break;
         case CMD_READ_GTB_ID: // get GTB id
             printf("file: %s, line: %d\r\n", __FILE__, __LINE__);
@@ -423,13 +429,14 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                                 tp_config->cs_high_en = true;
                                 tp_config->cs_low_en = true;
                             }
+                            GTB_DEBUG("long packet enable(1:true,):%x\r\n",tp_config->long_packet_enable);
                             if (tp_config->long_packet_enable == true)
                             {
                                 GTB_DEBUG("long packet enable\r\n");
                                 GTB_DEBUG("i2c_spi_long_packet_tx_buffer:\r\n");
                                 for(int i = 0; i < 4; i++)
                                 {
-                                    GTB_DEBUG("%x, ",i2c_spi_long_packet_rx_buffer[i]);
+                                    GTB_DEBUG("%x, ",i2c_spi_long_packet_tx_buffer[i]);
                                 }
                                 GTB_DEBUG("\r\n");
                                 GTB_DEBUG("long_packet_count: %d\r\n",tp_config->long_packet_count);
@@ -508,6 +515,9 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                         if (tp_config->spi_i2c_data_len > 56) // in case of data overflow
                             break;
 
+                        GTB_DEBUG("spi_i2c_data_len: %d\r\n",tp_config->spi_i2c_data_len);
+                        GTB_DEBUG("spi_i2c_count: %d\r\n",tp_config->spi_i2c_count);
+                        GTB_DEBUG("tp_config->long_packet_count: %x\r\n",tp_config->long_packet_count);
                         if (tp_config->long_packet_enable == true)
                         {
                             if ((tp_config->long_packet_count + tp_config->spi_i2c_data_len) > MAXI2CSPIBUFFERSIZE)
@@ -516,9 +526,11 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                                 send_error_code(tp_config->interface_mode, output, HAL_ERROR, com_mode);
                                 break;
                             }
+                            GTB_DEBUG("i2c_spi_long_packet_tx_buffer:\r\n");
                             for (int i = 0; i < tp_config->spi_i2c_data_len; i++)
                             {
                                 i2c_spi_long_packet_tx_buffer[tp_config->long_packet_count + i] = arg[i + 8];
+                                GTB_DEBUG("%x, ",i2c_spi_long_packet_tx_buffer[tp_config->long_packet_count + i]);
                             }
                             tp_config->long_packet_count += tp_config->spi_i2c_data_len;
                             break;

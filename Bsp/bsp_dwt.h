@@ -17,5 +17,5 @@ void bsp_init_dwt(void);
 void bsp_delay_dwt(uint32_t time);
 void bsp_delay_us(uint32_t time);
 void bsp_delay_ms(uint32_t time);
-
+uint32_t dwt_get_ms(void);
 #endif //BSP_DWT_H

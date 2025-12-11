@@ -45,6 +45,15 @@ extern "C" {
     #define RA_POWEREX_ERROR(fmt, ...)   do {} while(0)
     #define RA_POWEREX_DEBUG(fmt, ...)   do {} while(0)
 #endif
+#define TIME_DEBUG_ENABLE
+#ifdef TIME_DEBUG_ENABLE
+    #define TIME_DEBUG(fmt, ...)         printf("[TIME DEBUG] " fmt, ##__VA_ARGS__)
+    #define TIME_INFO(fmt, ...)          printf("[TIME INFO] " fmt, ##__VA_ARGS__)
+#else
+    #define TIME_DEBUG(fmt, ...)         do {} while(0)
+    #define TIME_INFO(fmt, ...)          do {} while(0)
+#endif  
+
 #define GTB_DEBUG_ENABLE
 #ifdef GTB_DEBUG_ENABLE
     #define GTB_DEBUG(fmt, ...)          printf(fmt, ##__VA_ARGS__)
@@ -71,7 +80,7 @@ extern "C" {
     #define AD_DATA_INFO(fmt, ...)       do {} while(0)
 #endif
 
-//#define USB_DEBUG_ENABLE
+#define USB_DEBUG_ENABLE
 #ifdef USB_DEBUG_ENABLE
     #define USB_DEBUG(fmt, ...)          printf(fmt, ##__VA_ARGS__)
     #define USB_INFO(fmt, ...)           printf("[USB INFO] " fmt, ##__VA_ARGS__)

@@ -83,6 +83,11 @@ void bsp_init()
 
     bsp_retarget_init(&huart1);
     bsp_init_dwt();
+    TIME_DEBUG("test100: %lu ms\r\n", dwt_get_ms());
+    HAL_Delay(100);
+    TIME_DEBUG("test100: %lu ms\r\n", dwt_get_ms());
+
+
     /* Print system version information */
     bsp_print_version_info();
     MX_CRC_Init();

@@ -342,6 +342,16 @@ void SPI1_IRQHandler(void)
   /* USER CODE END SPI1_IRQn 1 */
 }
 
+void SPI2_IRQHandler(void)
+{
+  /* USER CODE BEGIN SPI2_IRQn 0 */
+
+  /* USER CODE END SPI2_IRQn 0 */
+  HAL_SPI_IRQHandler(&hspi_tp);
+  /* USER CODE BEGIN SPI2_IRQn 1 */
+
+  /* USER CODE END SPI2_IRQn 1 */
+}
 /**
  * @brief This function handles USART1 global interrupt.
  */
@@ -656,9 +666,25 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
          spi_rx_tx_flag = 1;
          GTB_INFO("spi_rx_tx_flag set 1\r\n");
      }
+    if(hspi->Instance == SPI3){
+         GTB_INFO("spi3_rx_tx\r\n");
+     }
 
 }
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi)
+{
+    if (hspi == &hspi_tp) {
+        // 处理错误
+        GTB_INFO("[SPI ERROR] code=%lu\r\n", HAL_SPI_GetError(hspi));
+    }
+}
 
+void HAL_SPI_AbortCpltCallback(SPI_HandleTypeDef *hspi)
+{
+    if (hspi == &hspi_tp) {
+        GTB_INFO("[SPI ABORTED]\r\n");
+    }
+}
 /**
   * @brief This function handles USB On The Go HS End Point 1 Out global interrupt.
   */
@@ -694,9 +720,11 @@ void OTG_HS_EP1_IN_IRQHandler(void)
 void OTG_HS_IRQHandler(void)
 {
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
-
+  //TIME_DEBUG("INT: %lu ms\r\n", dwt_get_ms());
   /* USER CODE END OTG_HS_IRQn 0 */
+  HAL_GPIO_WritePin(TSPI_INT_GPIO_Port, TSPI_INT_Pin, 1);
   HAL_PCD_IRQHandler(&hpcd_USB_OTG_FS);
+  HAL_GPIO_WritePin(TSPI_INT_GPIO_Port, TSPI_INT_Pin, 0);
   /* USER CODE BEGIN OTG_HS_IRQn 1 */
 
   /* USER CODE END OTG_HS_IRQn 1 */
