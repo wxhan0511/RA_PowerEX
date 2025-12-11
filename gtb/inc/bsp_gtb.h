@@ -19,7 +19,7 @@ extern "C" {
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "debug.h"
 /* Exported types ------------------------------------------------------------*/
 typedef struct{
     bool ex_ti_flag;

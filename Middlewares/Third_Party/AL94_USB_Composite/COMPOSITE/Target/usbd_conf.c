@@ -447,9 +447,9 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 #endif
 #else /** if HAL_PCDEx_SetRxFiFo() is used by HAL driver */
 
-    HAL_PCDEx_SetRxFiFoInBytes(hpcd_USB_OTG_PTR, 512); // ALL OUT EP Buffer
+    HAL_PCDEx_SetRxFiFoInBytes(hpcd_USB_OTG_PTR, 2048); // ALL OUT EP Buffer
 
-    HAL_PCDEx_SetTxFiFoInBytes(hpcd_USB_OTG_PTR, 0, 64); // EP0 IN
+    HAL_PCDEx_SetTxFiFoInBytes(hpcd_USB_OTG_PTR, 0, 2048); // EP0 IN
 
 #if (USBD_USE_CDC_RNDIS == 1)
     HAL_PCDEx_SetTxFiFoInBytes(hpcd_USB_OTG_PTR, (CDC_RNDIS_IN_EP & 0x7F), 128);

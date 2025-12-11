@@ -101,7 +101,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(ADDR_RECON_PORT, &GPIO_InitStruct);
 
-
   // Initialize the power control pin, turn off all power by default, and the SHUTDOWN pin is on by default
   HAL_GPIO_WritePin(VCC_EN_GPIO_Port, VCC_EN_Pin, GPIO_PIN_RESET);//Low level off
   HAL_GPIO_WritePin(IOVCC_EN_GPIO_Port, IOVCC_EN_Pin, GPIO_PIN_RESET);//Low level off

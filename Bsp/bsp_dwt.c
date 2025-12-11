@@ -80,7 +80,10 @@ void bsp_delay_us(uint32_t time)
 		tCnt = DWT_CYCCNT - tStart; /* 求减过程中，如果发生第一次32位计数器重新计数，依然可以正确计算 */
 	}
 }
-
+uint32_t dwt_get_ms(void)
+{
+	return (DWT_CYCCNT / (SystemCoreClock / 1000000))/ 1000;
+}
 void bsp_delay_dwt(uint32_t time)
 {
     uint32_t tCnt, tDelayCnt;

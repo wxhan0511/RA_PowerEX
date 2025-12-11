@@ -14,7 +14,7 @@
 
 extern UART_HandleTypeDef huart1;
 extern SPI_HandleTypeDef hspi1;
-extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi_tp;
 extern I2C_HandleTypeDef hi2c1;
 extern uint8_t id;
 typedef StaticSemaphore_t osStaticMutexDef_t;

@@ -19,13 +19,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "spi.h"
-
+#include "stm32f4xx_hal_spi.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
 
 SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi3;
+extern SPI_HandleTypeDef hspi_tp;
 DMA_HandleTypeDef hdma_spi1_rx;
 DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi3_rx;
@@ -191,7 +192,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     */
     GPIO_InitStruct.Pin = TSPI_CS_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP; 
-    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     HAL_GPIO_Init(TSPI_CS_GPIO_Port, &GPIO_InitStruct);
 
@@ -213,6 +214,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     //TODO: Add SPI2 DMA initialization if needed
     HAL_NVIC_SetPriority(SPI2_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(SPI2_IRQn);
+
     /* USER CODE END SPI2_MspInit 1 */
   }
   else if(spiHandle->Instance==SPI3)

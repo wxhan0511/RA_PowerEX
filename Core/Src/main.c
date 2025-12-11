@@ -30,6 +30,7 @@
 #include "bsp.h"
 #include "stm32f4xx_hal.h"
 #include "delay.h"
+#include "gtb_task.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -55,9 +56,9 @@
 
 
 /* USER CODE BEGIN PV */
-unsigned char get_data_fs[1024] = {0}; //USB接收缓存
-unsigned char send_data_fs[64] = {0}; //USB发送缓存
-unsigned char USB_Received_Count = 0;//USB接收数据计数
+uint8_t get_data_fs[64] = {0}; //USB接收缓存
+uint8_t send_data_fs[64] = {0}; //USB发送缓存
+uint8_t USB_Received_Count = 0;//USB接收数据计数
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,12 +105,13 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_SPI1_Init();
-  MX_SPI3_Init();
+
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_SPI3_Init();
   MX_USART1_UART_Init();
   bsp_init();
+  //test_gtb_task();
   /* Init scheduler */
   osKernelInitialize(); /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();

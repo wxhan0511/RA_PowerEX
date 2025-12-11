@@ -40,4 +40,5 @@ extern bool hid_state_fs;
 void server_gtb(void *argument);
 void server_gtb_suspend();
 void server_gtb_init();
+void test_gtb_task(void);
 #endif /* __GTB_H */

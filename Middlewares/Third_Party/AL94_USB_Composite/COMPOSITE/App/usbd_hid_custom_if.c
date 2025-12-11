@@ -50,6 +50,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_hid_custom_if.h"
 #include "stdbool.h"
+#include "bsp_dwt.h"
 /* USER CODE BEGIN INCLUDE */
 
 /* USER CODE END INCLUDE */
@@ -222,14 +223,19 @@ static int8_t CUSTOM_HID_OutEvent(uint8_t event_idx, uint8_t state)
   //memcpy(buffer, state, 0x40);
   USBD_CUSTOM_HID_HandleTypeDef *hhid =(USBD_CUSTOM_HID_HandleTypeDef *)hUsbDevice.pClassData_HID_Custom;
   uint32_t usb_recv_len =USBD_GetRxCount(&hUsbDevice,CUSTOM_HID_OUT_EP);
+  TIME_DEBUG("usb3: %lu us\r\n", dwt_get_ms());
   USB_DEBUG("HOST->DEVICE:");
-  for(uint8_t i=0;i<16;i++)
+  for(uint8_t i=0;i<64;i++)
   {
     USB_DEBUG("%x,",hhid->Report_buf[i]);
-    send_data_fs[i]=hhid->Report_buf[i];
   }
+  // for(uint8_t i=0;i<64;i++)
+  // {
+  //   send_data_fs[i]=hhid->Report_buf[i];
+  // }
+  memcpy(send_data_fs,hhid->Report_buf,sizeof(send_data_fs));
   USB_DEBUG("\r\n");
-
+  TIME_DEBUG("USB4: %lu ms\r\n", dwt_get_ms());
   hid_state_fs = 1;
   //USBD_CUSTOM_HID_SendReport(&hUsbDevice, (uint8_t *)buffer, 0x40);
 

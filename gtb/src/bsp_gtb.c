@@ -47,7 +47,7 @@ void bsp_gtb_init(uint8_t mode){
 
     /* Set the SPI parameters */
     hspi_tp.Instance               = SPI2;
-    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;//SPI 21MHz
+    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;//SPI 5.25MHz
     hspi_tp.Init.Direction         = SPI_DIRECTION_2LINES;
     hspi_tp.Init.CLKPhase          = SPI_PHASE_1EDGE;
     hspi_tp.Init.CLKPolarity       = SPI_POLARITY_LOW;
@@ -61,8 +61,27 @@ void bsp_gtb_init(uint8_t mode){
     tp_spi_set_mode(mode);
 
     tp_spi_cs_enable(false);
-
+    //註冊回調
+    if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_ERROR_CB_ID, HAL_SPI_ErrorCallback) != HAL_OK) {
+        Error_Handler();
+    }
+    if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_ABORT_CB_ID, HAL_SPI_AbortCpltCallback) != HAL_OK) {
+        Error_Handler();
+    }
+    /* 注册传输完成回调（TXRX 完成） */
+    if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_TX_RX_COMPLETE_CB_ID, HAL_SPI_TxRxCpltCallback) != HAL_OK) {
+        Error_Handler();
+    }
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    GPIO_InitStruct.Pin = TSPI_INT_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    HAL_GPIO_Init(TSPI_INT_GPIO_Port, &GPIO_InitStruct);
     //TODO:
+    /* EXTI interrupt init*/
+    // HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+    // HAL_NVIC_EnableIRQ(EXTI3_IRQn);
    
 }
 
@@ -101,15 +120,14 @@ HAL_StatusTypeDef spi_read_write_data2( uint8_t *write_data, uint8_t *read_data,
                                         uint16_t read_size,uint16_t write_size)
 {
     HAL_StatusTypeDef status = HAL_OK;
-    status = HAL_SPI_TransmitReceive_IT(&hspi_tp,write_data,read_data,write_size+read_size);
-    //status = HAL_SPI_TransmitReceive(&hspi_tp,write_data,read_data,write_size+read_size,1000);
+    //status = HAL_SPI_TransmitReceive_IT(&hspi_tp,write_data,read_data,write_size+read_size);
+    status = HAL_SPI_TransmitReceive(&hspi_tp,write_data,read_data,write_size+read_size,10);
     GTB_DEBUG("spi_read_write_data2 status(HAL_OK:0): %d\r\n",status);
-    if (status != HAL_OK)
-        GTB_INFO("[error] gtb read write irq %d \r\n",status);
+    if (status != HAL_OK) GTB_INFO("[error] gtb read write irq %d \r\n",status);
+    else spi_rx_tx_flag=1;
     while(spi_rx_tx_flag == 0) 
     {
         GTB_INFO("[wait] spi_rx_tx_flag == 0\r\n");
-        HAL_Delay(10);
     }
     spi_rx_tx_flag = 0;
     return status;
@@ -269,13 +287,13 @@ HAL_StatusTypeDef gtb_write_data(tp_config_t *tp_config,bool mode,uint8_t *pData
     else
     {
 
-        printf("    [gtb write] (%d)",data_len);
-        if (data_len != 56)
-        {
-            for (uint8_t i=0;i<data_len;i++)
-                printf("0x%x ",pData[i]);
-        }
-        printf("\r\n");
+        GTB_DEBUG("    [gtb write] (%d)",data_len);
+        // if (data_len != 56)
+        // {
+        //     for (uint8_t i=0;i<data_len;i++)
+        //         GTB_DEBUG("0x%x ",pData[i]);
+        // }
+        GTB_DEBUG("\r\n");
         if (tp_config->cs_high_en == true)
         {
             tp_config->transfer_flag = true;
@@ -285,6 +303,7 @@ HAL_StatusTypeDef gtb_write_data(tp_config_t *tp_config,bool mode,uint8_t *pData
         if(data_len > MAXI2CSPIBUFFERSIZE)
             return HAL_ERROR;
         status = spi_read_write_data2(pData,SPI_Buffer_Rx_tmp,data_len,0);
+        
         if (tp_config->cs_low_en == true)
         {
             tp_spi_cs_enable(false);
