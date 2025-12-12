@@ -120,24 +120,28 @@ extern uint8_t send_data_fs[64];
   */
 
 /** Usb HID report descriptor. */
+/*未使用 Report ID（无 0x85），因此每帧就是单一 64 字节 IN/OUT 报告；Feature 为 1 字节。*/
+/*若需要区分不同类型数据，建议增加 Report ID（0x85,<id>），为各类 IN/OUT 定义不同大小/语义。*/
+/*与端点 wMaxPacketSize 应匹配为 64（FS 中断端点最大 64）。*/
 __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END =
     {
         /* USER CODE BEGIN 0 */
-        0x06, 0x00, 0xff, //Usage Page(Undefined )
-        0x09, 0x01,       // USAGE (Undefined)
-        0xa1, 0x01,       // COLLECTION (Application)
-        0x15, 0x00,       //   LOGICAL_MINIMUM (0)
-        0x26, 0xff, 0x00, //   LOGICAL_MAXIMUM (255)
-        0x75, 0x08,       //   REPORT_SIZE (8)
-        0x95, 0x40,       //   REPORT_COUNT (64)
-        0x09, 0x01,       //   USAGE (Undefined)
-        0x81, 0x02,       //   INPUT (Data,Var,Abs)
-        0x95, 0x40,       //   REPORT_COUNT (64)
-        0x09, 0x01,       //   USAGE (Undefined)
-        0x91, 0x02,       //   OUTPUT (Data,Var,Abs)
-        0x95, 0x01,       //   REPORT_COUNT (1)
-        0x09, 0x01,       //   USAGE (Undefined)
-        0xb1, 0x02,       //   FEATURE (Data,Var,Abs)
+        0x06, 0x00, 0xff, //Usage Page(Undefined )      Usage Page = 0xFF00（Vendor-defined/厂商自定义页）
+        0x09, 0x01,       // USAGE (Undefined)          Usage = 0x01（未定义）
+        0xa1, 0x01,       // COLLECTION (Application)   开始
+        0x15, 0x00,       //   LOGICAL_MINIMUM (0)      
+        0x26, 0xff, 0x00, //   LOGICAL_MAXIMUM (255)    (每字节 0..255）
+        0x75, 0x08,       //   REPORT_SIZE (8)          每元素 8bit（1 字节)
+
+        0x95, 0x40,       //   REPORT_COUNT (64)        0x40 → 有 64 个这样的元素 输入报告是 64 字节。
+        0x09, 0x01,       //   USAGE (Undefined)        -----Usage = 1（用于输入报告）------
+        0x81, 0x02,       //   INPUT (Data,Var,Abs)     定义 64 字节输入报告（设备→主机）
+        0x95, 0x40,       //   REPORT_COUNT (64)        REPORT_COUNT = 64       输出报告是 64 字节
+        0x09, 0x01,       //   USAGE (Undefined)        -----Usage = 1（用于输出报告）------
+        0x91, 0x02,       //   OUTPUT (Data,Var,Abs)    定义 64 字节输出报告（主机→设备）    
+        0x95, 0x01,       //   REPORT_COUNT (1)         REPORT_COUNT = 1        特征报告是 1 字节
+        0x09, 0x01,       //   USAGE (Undefined)        Usage = 1（用于特征报告）
+        0xb1, 0x02,       //   FEATURE (Data,Var,Abs)   定义 1 字节 Feature 报告（配置/状态类）
 
         /* USER CODE END 0 */
         0xC0 /*     END_COLLECTION	             */

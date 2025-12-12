@@ -722,9 +722,8 @@ void OTG_HS_IRQHandler(void)
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
   //TIME_DEBUG("INT: %lu ms\r\n", dwt_get_ms());
   /* USER CODE END OTG_HS_IRQn 0 */
-  HAL_GPIO_WritePin(TSPI_INT_GPIO_Port, TSPI_INT_Pin, 1);
   HAL_PCD_IRQHandler(&hpcd_USB_OTG_FS);
-  HAL_GPIO_WritePin(TSPI_INT_GPIO_Port, TSPI_INT_Pin, 0);
+
   /* USER CODE BEGIN OTG_HS_IRQn 1 */
 
   /* USER CODE END OTG_HS_IRQn 1 */
