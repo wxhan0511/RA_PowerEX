@@ -191,7 +191,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     PC3     ------> SPI2_MOSI
     */
     GPIO_InitStruct.Pin = TSPI_CS_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP; 
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; 
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     HAL_GPIO_Init(TSPI_CS_GPIO_Port, &GPIO_InitStruct);
@@ -209,8 +209,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
     HAL_GPIO_Init(TSPI_MISO_GPIO_Port, &GPIO_InitStruct);
-    printf("---------------------------------------------------\r\n");
     /* USER CODE BEGIN SPI2_MspInit 1 */
+    HAL_GPIO_WritePin(TSPI_CS_GPIO_Port, TSPI_CS_Pin, 1);
     //TODO: Add SPI2 DMA initialization if needed
     HAL_NVIC_SetPriority(SPI2_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(SPI2_IRQn);

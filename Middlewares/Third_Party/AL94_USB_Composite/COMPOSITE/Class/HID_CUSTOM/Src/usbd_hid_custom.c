@@ -45,7 +45,7 @@ EndBSPDependencies */
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_hid_custom.h"
 #include "usbd_ctlreq.h"
-
+#include "bsp_dwt.h"
 #define _CUSTOM_HID_IN_EP 0x81U
 #define _CUSTOM_HID_OUT_EP 0x01U
 #define _CUSTOM_HID_ITF_NBR 0x00U

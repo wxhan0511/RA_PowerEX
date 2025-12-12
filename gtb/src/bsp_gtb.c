@@ -38,16 +38,18 @@ void tp_spi_cs_enable(bool state)
 {
     if(state == true){
         HAL_GPIO_WritePin(TSPI_CS_GPIO_Port, TSPI_CS_Pin, 0);
+        printf("CS Low\r\n");
     }
     else{
         HAL_GPIO_WritePin(TSPI_CS_GPIO_Port, TSPI_CS_Pin, 1);
+        printf("CS High\r\n");
     }
 }
 void bsp_gtb_init(uint8_t mode){
 
     /* Set the SPI parameters */
     hspi_tp.Instance               = SPI2;
-    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;//SPI 5.25MHz
+    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;//SPI 5.25MHz
     hspi_tp.Init.Direction         = SPI_DIRECTION_2LINES;
     hspi_tp.Init.CLKPhase          = SPI_PHASE_1EDGE;
     hspi_tp.Init.CLKPolarity       = SPI_POLARITY_LOW;
@@ -132,6 +134,7 @@ HAL_StatusTypeDef spi_read_write_data2( uint8_t *write_data, uint8_t *read_data,
     spi_rx_tx_flag = 0;
     return status;
 }
+
 
 HAL_StatusTypeDef i2c_write_data(uint8_t slave_address,uint8_t *write_data,uint16_t write_size)
 {
