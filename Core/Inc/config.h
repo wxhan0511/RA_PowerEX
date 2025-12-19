@@ -74,6 +74,6 @@
 //only one can be defined
 #define CDC
 // #define CHID
-#define RA_POWERSUPPLY_FOR_IC
+//#define RA_POWERSUPPLY_FOR_IC
 
 #endif /* __CONFIG_H */

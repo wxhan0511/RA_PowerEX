@@ -666,7 +666,8 @@ void I2C2_ER_IRQHandler(void)
 /*used for gtb_task*/
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
-     if(hspi->Instance == SPI2){
+     //printf("HAL_SPI_TxRxCpltCallback\r\n");
+     if(hspi == &hspi_tp){
          spi_rx_tx_flag = 1;
          //printf("SPI2 TxRx Complete\r\n");
      }
@@ -692,14 +693,18 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 
 void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi)
 {
-  uint32_t err = HAL_SPI_GetError(hspi);
-  if (err & HAL_SPI_ERROR_OVR) {
-    __HAL_SPI_CLEAR_OVRFLAG(hspi);
-  }
-
-  if (hspi == &hspi_tp) {
-    GTB_INFO("[SPI ERROR] code=%lu\r\n", err);
-  }
+    if (hspi == &hspi_tp) {
+        // 处理错误
+        // #define HAL_SPI_ERROR_NONE              (0x00000000U)   /*!< No error                               */
+        // #define HAL_SPI_ERROR_MODF              (0x00000001U)   /*!< MODF error                             */
+        // #define HAL_SPI_ERROR_CRC               (0x00000002U)   /*!< CRC error                              */
+        // #define HAL_SPI_ERROR_OVR               (0x00000004U)   /*!< OVR error                              */
+        // #define HAL_SPI_ERROR_FRE               (0x00000008U)   /*!< FRE error                              */
+        // #define HAL_SPI_ERROR_DMA               (0x00000010U)   /*!< DMA transfer error                     */
+        // #define HAL_SPI_ERROR_FLAG              (0x00000020U)   /*!< Error on RXNE/TXE/BSY Flag             */
+        // #define HAL_SPI_ERROR_ABORT             (0x00000040U)   /*!< Error during SPI Abort procedure       */
+        GTB_INFO("[SPI ERROR] code=%lu\r\n", HAL_SPI_GetError(hspi));
+    }
 }
 
 void HAL_SPI_AbortCpltCallback(SPI_HandleTypeDef *hspi)

@@ -113,7 +113,7 @@ int main(void)
   
   bsp_init();
   
-  test_gtb_task();
+  //test_gtb_task();
   /* Init scheduler */
   osKernelInitialize(); /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();

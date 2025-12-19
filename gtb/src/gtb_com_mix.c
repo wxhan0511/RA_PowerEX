@@ -35,7 +35,7 @@ uint8_t data1[64];
 uint8_t gtb_flag = 0;
 uint8_t gtb_fs_transmit(uint8_t *hid_data, uint32_t len, uint8_t com_mode)
 {
-    printf("com mode %d \r\n",com_mode);
+    //printf("com mode %d \r\n",com_mode);
     uint8_t status = 0;
     if ((GTB_HID == com_mode) || (GTB_MIX == com_mode))
     {
@@ -551,7 +551,6 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                                 i2c_spi_tx_buf[e] = arg[e + 8];
                             }
                         }
-
                         tp_config->transfer_status = gtb_write_data(tp_config,tp_config->interface_mode, i2c_spi_tx_buf, tp_config->spi_i2c_data_len);
                         if (tp_config->transfer_status != HAL_OK)
                         {
@@ -1482,7 +1481,7 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
         case FWMODE_DEMO:
             if (tp_config->int_flag == true)
             {
-                printf("fw_mode: %d\r\n", tp_config->fw_mode);
+                //printf("fw_mode: %d\r\n", tp_config->fw_mode);
                 //printf("---- 1 ---- \r\n");
                 tp_config->int_flag = false;
                 tp_config->transfer_flag = true;
@@ -1601,29 +1600,29 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
         case FWMODE_RAWDATA:
 
         case FWMODE_DEBUG:
-            printf("fw_mode: %d\r\n", tp_config->fw_mode);
+            //printf("fw_mode: %d\r\n", tp_config->fw_mode);
 
             if ((tp_config->ic_type_index & 0x0f) == IC_TYPE_NT)
             {
                 if (tp_config->raw_data_flag == true)
                     tp_config->int_flag = true;
             }
-            printf("tp_config->int_flag: %d\r\n", tp_config->int_flag);
+            //printf("tp_config->int_flag: %d\r\n", tp_config->int_flag);
             if (tp_config->int_flag == true)
             {
                 if (tp_config->ic_touch_data_len != 0) // prevent error int
                 {
-                    printf("tp_config->ic_touch_data_len: %d\r\n", tp_config->ic_touch_data_len);
+                    //printf("tp_config->ic_touch_data_len: %d\r\n", tp_config->ic_touch_data_len);
                     tp_config->transfer_flag = true;
                     // delay_us(100);
                     // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, GPIO_PIN_RESET);
                     //printf("??\r\n");
                     
                     tp_config->transfer_status = gtb_read_raw_data(tp_config,tp_config->interface_mode, tp_config->ic_type_index, tp_config->ic_touch_data_len1);
-                    printf("tp_config->transfer_status: %d\r\n", tp_config->transfer_status);
+                    //printf("tp_config->transfer_status: %d\r\n", tp_config->transfer_status);
                     if (tp_config->transfer_status != HAL_OK)
                     {
-                        printf("raw/debug read error\r\n");
+                        //printf("raw/debug read error\r\n");
                         tp_config->int_flag = false;
                         tp_config->transfer_flag = false;
                         break;
@@ -1679,7 +1678,7 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                     tp_config->fw_data_len1 = tp_config->ic_touch_data_len % 56;
                     output[2] = tp_config->fw_mode;
                     output[3] = tp_config->ic_type_index;
-                    printf("tp_config->fw_data_len=%d, tp_config->fw_data_len1=%d\r\n",tp_config->fw_data_len,tp_config->fw_data_len1);
+                    //printf("tp_config->fw_data_len=%d, tp_config->fw_data_len1=%d\r\n",tp_config->fw_data_len,tp_config->fw_data_len1);
                     if (com_mode == GTB_HID)
                     {
                         for (int j = 0; j < tp_config->fw_data_len; j++)
@@ -1694,7 +1693,7 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                             
                             gtb_fs_transmit(output, 64, com_mode);
                             //printf("222\r\n");
-                            printf("j=%d\r\n", j);
+                            //printf("j=%d\r\n", j);
                             //osDelay(1);
 
                             if ((j != (tp_config->fw_data_len - 1)) || (tp_config->fw_data_len1 != 0))
