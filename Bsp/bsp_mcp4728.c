@@ -41,10 +41,15 @@ void  bsp_dac_init(dac_dev_t *dev)
     ELVSS_DISABLE();
     IOVCC_DISABLE();
     VCC_DISABLE();
-    //写死电压版本---------------IOVCC=1.8V、VCC=5.3v、ELVDD=8.8v
-    // g_calibration_manager.data.iovcc_last_voltage=1800.0f;
-    // g_calibration_manager.data.vcc_last_voltage=5300.0f;
-    // g_calibration_manager.data.elvdd_last_voltage=8800.0f;
+    //写死电压版本
+    //---------------IOVCC=1.8V、ELVSS=2.224v、VCC=2.72v
+#ifdef RA_POWERSUPPLY_FOR_IC
+    g_calibration_manager.data.iovcc_last_voltage=1620.0f;
+    // g_calibration_manager.data.elvdd_last_voltage=6188.0f; //#1,#2屏
+    g_calibration_manager.data.elvdd_last_voltage=5957.0f; //铁哥给的屏
+    RA_POWEREX_INFO("IOVCC fixed voltage %dmv supplies power to IC\r\n", (uint32_t)g_calibration_manager.data.iovcc_last_voltage);
+    RA_POWEREX_INFO("ELVDD fixed voltage %dmv supplies power to IC\r\n", (uint32_t)g_calibration_manager.data.elvdd_last_voltage);
+#endif
     //---------------------------------------------
     RA_POWEREX_INFO("ELVDD: %f mV\r\n",  g_calibration_manager.data.elvdd_last_voltage);
     RA_POWEREX_INFO("ELVSS: %f mV\r\n",  g_calibration_manager.data.elvss_last_voltage);
@@ -85,8 +90,8 @@ void  bsp_dac_init(dac_dev_t *dev)
     //写死电压版本---------------IOVCC=1.8V、VCC=5.3v、ELVDD=8.8v
     // ELVDD_ENABLE();
     //------------------------------------
-    //ELVDD_ENABLE();
-    //ELVSS_ENABLE();
+    ELVDD_ENABLE();
+    ELVSS_ENABLE();
     IOVCC_ENABLE();
     VCC_ENABLE();
     CDC_DEBUG("IOVCC and VCC enabled\r\n");

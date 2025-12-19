@@ -31,18 +31,15 @@ extern "C" {
 #endif
 
 /* -------------------- Debug Macros -------------------- */
-#define RA_POWEREX_DEBUG_ENABLE 1
+#define RA_POWEREX_INFO(fmt, ...)    printf(fmt, ##__VA_ARGS__)
+#define RA_POWEREX_WARN(fmt, ...)    printf(fmt, ##__VA_ARGS__)
+#define RA_POWEREX_ERROR(fmt, ...)   printf( fmt, ##__VA_ARGS__)
+//#define RA_POWEREX_DEBUG_ENABLE 1
 #if RA_POWEREX_DEBUG_ENABLE
     #define RA_POWEREX_PRINTF(fmt, ...)  printf("[RA_POWEREX] " fmt, ##__VA_ARGS__)
-    #define RA_POWEREX_INFO(fmt, ...)    printf("[RA_POWEREX][INFO] " fmt, ##__VA_ARGS__)
-    #define RA_POWEREX_WARN(fmt, ...)    printf("[RA_POWEREX][WARN] " fmt, ##__VA_ARGS__)
-    #define RA_POWEREX_ERROR(fmt, ...)   printf("[RA_POWEREX][ERROR] " fmt, ##__VA_ARGS__)
     #define RA_POWEREX_DEBUG(fmt, ...)   printf("[RA_POWEREX][DEBUG] " fmt, ##__VA_ARGS__)
 #else
     #define RA_POWEREX_PRINTF(fmt, ...)  do {} while(0)
-    #define RA_POWEREX_INFO(fmt, ...)    do {} while(0)
-    #define RA_POWEREX_WARN(fmt, ...)    do {} while(0)
-    #define RA_POWEREX_ERROR(fmt, ...)   do {} while(0)
     #define RA_POWEREX_DEBUG(fmt, ...)   do {} while(0)
 #endif
 //#define TIME_DEBUG_ENABLE
@@ -54,13 +51,13 @@ extern "C" {
     #define TIME_INFO(fmt, ...)          do {} while(0)
 #endif  
 
+#define GTB_INFO(fmt, ...)           printf(fmt, ##__VA_ARGS__)
 //#define GTB_DEBUG_ENABLE
 #ifdef GTB_DEBUG_ENABLE
     #define GTB_DEBUG(fmt, ...)          printf(fmt, ##__VA_ARGS__)
-    #define GTB_INFO(fmt, ...)           printf("[GTB INFO] " fmt, ##__VA_ARGS__)
+
 #else
     #define GTB_DEBUG(fmt, ...)          do {} while(0)
-    #define GTB_INFO(fmt, ...)           do {} while(0)
 #endif
 #define I2C_DEBUG_ENABLE
 #ifdef I2C_DEBUG_ENABLE

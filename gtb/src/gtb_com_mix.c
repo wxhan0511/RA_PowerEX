@@ -35,10 +35,11 @@ uint8_t data1[64];
 uint8_t gtb_flag = 0;
 uint8_t gtb_fs_transmit(uint8_t *hid_data, uint32_t len, uint8_t com_mode)
 {
-    //printf("com mode %d \r\n",com_mode);
+    printf("com mode %d \r\n",com_mode);
     uint8_t status = 0;
     if ((GTB_HID == com_mode) || (GTB_MIX == com_mode))
     {
+        
         //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
         //status = USBD_HID_GetReportTrigger(0U, 0U, hid_data, len);
         status = USBD_CUSTOM_HID_SendReport(&hUsbDevice, hid_data, len);
@@ -164,7 +165,6 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
     switch (arg[1])
     {
         case CMD_RESET_FLOW: // reset GTB FW flow
-            printf("file: %s, line: %d\r\n", __FILE__, __LINE__);
             GTB_DEBUG("gtb_generic_com cmd: %x\r\n",arg[1]);
             if (arg[2] == 0xff) {
                 gtb_global_var_init(tp_config);
@@ -175,7 +175,6 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
             }
             break;
         case CMD_READ_GTB_VERSION: // get GTB FW version
-            printf("file: %s, line: %d\r\n", __FILE__, __LINE__);
             TIME_DEBUG("ver: %lu \r\n", dwt_get_ms());
             GTB_DEBUG("gtb_generic_com cmd: %x\r\n",arg[1]);            output[0] = arg[0];
             output[1] = arg[1];
@@ -190,8 +189,8 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
             TIME_DEBUG("verend: %lu \r\n", dwt_get_ms());
             break;
         case CMD_READ_GTB_ID: // get GTB id
-            printf("file: %s, line: %d\r\n", __FILE__, __LINE__);
-            GTB_DEBUG("gtb_generic_com cmd: %x\r\n",arg[1]);            output[0] = arg[0];
+            GTB_DEBUG("gtb_generic_com cmd: %x\r\n",arg[1]);            
+            output[0] = arg[0];
             output[1] = arg[1];
             output[2] = 0x01;
             for (int i = 3; i < MAXUSBPACKETSIZE; i++)
@@ -513,8 +512,9 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                         tp_config->spi_i2c_count |= arg[5];
 
                         if (tp_config->spi_i2c_data_len > 56) // in case of data overflow
+                        {    
                             break;
-
+                        }
                         GTB_DEBUG("spi_i2c_data_len: %d\r\n",tp_config->spi_i2c_data_len);
                         GTB_DEBUG("spi_i2c_count: %d\r\n",tp_config->spi_i2c_count);
                         GTB_DEBUG("tp_config->long_packet_count: %x\r\n",tp_config->long_packet_count);
@@ -737,7 +737,7 @@ void gtb_generic_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
             {
                 fw_mode_switch(tp_config,tp_config->ic_type_index, tp_config->interface_mode, FWMODE_DISABLE);
                 //ex_ti_initial(tp_config,DISABLE);
-                HAL_NVIC_DisableIRQ(EXTI3_IRQn);
+                HAL_NVIC_DisableIRQ(EXTI4_IRQn);
                 tp_config->ex_ti_flag = false;
                 tp_config->int_flag = false;
                 break;
@@ -1475,12 +1475,14 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
         tp_config->int_flag = false;
         tp_config->transfer_flag = false;
     }
+    
     // for demo,rawdata or debug mode
     switch (tp_config->fw_mode)
     {
         case FWMODE_DEMO:
             if (tp_config->int_flag == true)
             {
+                printf("fw_mode: %d\r\n", tp_config->fw_mode);
                 //printf("---- 1 ---- \r\n");
                 tp_config->int_flag = false;
                 tp_config->transfer_flag = true;
@@ -1488,7 +1490,7 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                 tp_config->transfer_status = gtb_read_coordination_dynamic(tp_config,touch_data_demo_raw_data);
                 if (tp_config->transfer_status != HAL_OK)
                 {
-                    printf("demo read error\r\n");
+                    //printf("demo read error\r\n");
                     send_error_code(tp_config->interface_mode, output, tp_config->transfer_status, com_mode);
                     break;
                 }
@@ -1590,7 +1592,7 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                     {
                         output[i + 8] = touch_data_demo_raw_data[i];
                     }
-                    printf("c\r\n");
+                    //printf("c\r\n");
                     gtb_fs_transmit(output, 64, com_mode);
                 }
                 tp_config->transfer_flag = false;
@@ -1599,23 +1601,29 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
         case FWMODE_RAWDATA:
 
         case FWMODE_DEBUG:
+            printf("fw_mode: %d\r\n", tp_config->fw_mode);
 
             if ((tp_config->ic_type_index & 0x0f) == IC_TYPE_NT)
             {
                 if (tp_config->raw_data_flag == true)
                     tp_config->int_flag = true;
             }
+            printf("tp_config->int_flag: %d\r\n", tp_config->int_flag);
             if (tp_config->int_flag == true)
             {
                 if (tp_config->ic_touch_data_len != 0) // prevent error int
                 {
+                    printf("tp_config->ic_touch_data_len: %d\r\n", tp_config->ic_touch_data_len);
                     tp_config->transfer_flag = true;
                     // delay_us(100);
                     // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, GPIO_PIN_RESET);
                     //printf("??\r\n");
+                    
                     tp_config->transfer_status = gtb_read_raw_data(tp_config,tp_config->interface_mode, tp_config->ic_type_index, tp_config->ic_touch_data_len1);
+                    printf("tp_config->transfer_status: %d\r\n", tp_config->transfer_status);
                     if (tp_config->transfer_status != HAL_OK)
                     {
+                        printf("raw/debug read error\r\n");
                         tp_config->int_flag = false;
                         tp_config->transfer_flag = false;
                         break;
@@ -1651,8 +1659,10 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                             }
                             tp_config->ic_touch_data_len = tp_config->ic_touch_data_len1 - tp_config->ic_touch_data_index;
                         }
-                        else
+                        else{
+                            printf("error\r\n");
                             break;
+                        }
                     }
                     else
                     {
@@ -1669,6 +1679,7 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                     tp_config->fw_data_len1 = tp_config->ic_touch_data_len % 56;
                     output[2] = tp_config->fw_mode;
                     output[3] = tp_config->ic_type_index;
+                    printf("tp_config->fw_data_len=%d, tp_config->fw_data_len1=%d\r\n",tp_config->fw_data_len,tp_config->fw_data_len1);
                     if (com_mode == GTB_HID)
                     {
                         for (int j = 0; j < tp_config->fw_data_len; j++)
@@ -1680,13 +1691,15 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                             {
                                 output[8 + i] = touch_data_demo_raw_data[j * 56 + i + tp_config->ic_touch_data_index];
                             }
+                            
                             gtb_fs_transmit(output, 64, com_mode);
-
-                            osDelay(1);
+                            //printf("222\r\n");
+                            printf("j=%d\r\n", j);
+                            //osDelay(1);
 
                             if ((j != (tp_config->fw_data_len - 1)) || (tp_config->fw_data_len1 != 0))
                             {
-                                osDelay(1 + tp_config->raw_data_delay_time);
+                                //osDelay(1 + tp_config->raw_data_delay_time);
                                 //	                            delay_us(200);
                             }
                         }

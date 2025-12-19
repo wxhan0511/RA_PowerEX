@@ -79,24 +79,28 @@ void test_gtb_task(void)
     hid_state_fs = 0;
     bsp_gtb_init(3);
     gtb_global_var_init(&tp_config_hid);
-    ex_ti_initial(&tp_config_hid, DISABLE);
+    ex_ti_initial(&tp_config_hid, DISABLE); //Please note that the TP-INT interrupt is turned off here
     __IO uint8_t com_mode = GTB_HID;
     for (;;)
     {
         //打印时间戳
         TIME_DEBUG("Tick1: %lu \r\n", dwt_get_ms());
-        gtb_fw_mode_com(&tp_config_hid, send_data_fs, get_data_fs, GTB_HID);
-        if (hid_state_fs)
+        if(hUsbDevice.dev_state == USBD_STATE_CONFIGURED)
         {
-            TIME_DEBUG("Tick2: %lu \r\n", dwt_get_ms());
-            if (0x40 == send_data_fs[0])
-            {   TIME_DEBUG("Tick3: %lu \r\n", dwt_get_ms());
-                GTB_DEBUG("receive HID DATA:%x,%x,%x,%x, enter gtb_generic_com\r\n",send_data_fs[0],send_data_fs[1],send_data_fs[2],send_data_fs[3]);
-                TIME_DEBUG("start: %lu ms\r\n", dwt_get_ms());
-                gtb_generic_com(&tp_config_hid, send_data_fs, get_data_fs, GTB_HID);
-                TIME_DEBUG("end: %lu ms\r\n", dwt_get_ms());
+
+            gtb_fw_mode_com(&tp_config_hid, send_data_fs, get_data_fs, GTB_HID);
+            if (hid_state_fs)
+            {
+                TIME_DEBUG("Tick2: %lu \r\n", dwt_get_ms());
+                if (0x40 == send_data_fs[0])
+                {   TIME_DEBUG("Tick3: %lu \r\n", dwt_get_ms());
+                    GTB_DEBUG("receive HID DATA:%x,%x,%x,%x, enter gtb_generic_com\r\n",send_data_fs[0],send_data_fs[1],send_data_fs[2],send_data_fs[3]);
+                    TIME_DEBUG("start: %lu ms\r\n", dwt_get_ms());
+                    gtb_generic_com(&tp_config_hid, send_data_fs, get_data_fs, GTB_HID);
+                    TIME_DEBUG("end: %lu ms\r\n", dwt_get_ms());
+                }
+                hid_state_fs = 0;
             }
-            hid_state_fs = 0;
         }
     }
 }

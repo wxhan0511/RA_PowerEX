@@ -83,17 +83,16 @@ void bsp_init()
 
     bsp_retarget_init(&huart1);
     bsp_init_dwt();
-    TIME_DEBUG("test100: %lu ms\r\n", dwt_get_ms());
-    HAL_Delay(100);
-    TIME_DEBUG("test100: %lu ms\r\n", dwt_get_ms());
-
-
+    // TIME_DEBUG("test100: %lu ms\r\n", dwt_get_ms());
+    // HAL_Delay(100);
+    // TIME_DEBUG("test100: %lu ms\r\n", dwt_get_ms());
     /* Print system version information */
     bsp_print_version_info();
     MX_CRC_Init();
     // bsp_test_spi_flash();  //for test flash
     calibration_load(); //If the calibration value does not exist, write the default value
     //bsp_init_power_control();  //initialize power switch , Not set temporarily, restore the previous switch state and voltage value
+    
     bsp_init_adc_system();
     bsp_level_shift_direction_set(1);
     bsp_dac_init(&dac_dev);
@@ -249,61 +248,66 @@ static void bsp_test_spi_flash(void)
 static void ra_xb_Power_Init(void)
 {   uint8_t temp;
     BSP_STATUS status;
-    //打印
+    //Print the value set in the last configuration
     RA_POWEREX_INFO("xb_iovcc %fmv\r\n",g_calibration_manager.data.xb_iovcc_last_voltage);
     RA_POWEREX_INFO("vci %fmv\r\n",g_calibration_manager.data.vci_last_voltage);
     RA_POWEREX_INFO("vsp %fmv\r\n",g_calibration_manager.data.vsp_last_voltage);
     RA_POWEREX_INFO("vsn %fmv\r\n",g_calibration_manager.data.vsn_last_voltage);
-    //恢复上次设置的电压
+#ifdef RA_POWERSUPPLY_FOR_IC    
+    //fix vsn as -5.5v,for download initial code
+    // g_calibration_manager.data.vsp_last_voltage = 5900; //#1 #2屏
+    g_calibration_manager.data.vsn_last_voltage = 6125; //铁哥给的屏
+    RA_POWEREX_INFO("xb_vsp  fixed voltage %dmv supplies power to IC\r\n", g_calibration_manager.data.vsp_last_voltage);
+#endif
+    //Restore the last set voltage
     temp = float_to_uint8_round(g_calibration_manager.data.xb_iovcc_last_voltage / 100);
     status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_IOVCC, temp);
     if(status != BSP_OK){
-        printf("IOVCC set power failed\r\n");
+        RA_POWEREX_INFO("xb_iovcc set power failed\r\n");
     }
     temp = float_to_uint8_round(g_calibration_manager.data.vci_last_voltage / 100);
     status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VCI, temp);
     if(status != BSP_OK){
-        printf("VCI set power failed\r\n");
+        RA_POWEREX_INFO("VCI set power failed\r\n");
     }
     temp = float_to_uint8_round(g_calibration_manager.data.vsp_last_voltage / 100);
     //status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VSP, temp);
     status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev, RA_POWER_VSP, temp);
-
     if(status != BSP_OK){
-        printf("VSP set power failed\r\n");
+        RA_POWEREX_INFO("VSP set power failed\r\n");
     }
     temp = float_to_uint8_round(g_calibration_manager.data.vsn_last_voltage / 100);
     status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VSN, temp);
-    
     if(status != BSP_OK){
-        printf("VSN set power failed\r\n");
+        RA_POWEREX_INFO("VSN set power failed\r\n");
     }
-    //osDelay(10);
+    //MVDD and VDDIO fixed and enabled , for 2828 power supply, no need to change
     status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_MVDD, 12);//控2828
     if(status != BSP_OK){
-        printf("MVDD set power failed\r\n");
+        RA_POWEREX_INFO("MVDD set power failed\r\n");
     }
-    //osDelay(10);
     status = ra_dev_main_0.ops->set_power_vol(ra_dev_main_0.dev,RA_POWER_VDDIO, 18); //控2828
     if(status != BSP_OK){
-        printf("VDDIO set power failed\r\n");
+        RA_POWEREX_INFO("VDDIO set power failed\r\n");
     }
-    //osDelay(10);
+    //MVDD and VDDIO fixed and enabled , for 2828 power supply, no need to change
     ra_dev_main_0.dev->tca9554->read(RA_TCA9554_POWER_OFF,0x01,0);
     
-
-    status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VSN,0);
+    //VSN enable or not
+    status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VSN,1);
     if(status != BSP_OK){
-        printf("[drv ra ops] main 0x%x vsn power off\r\n",ra_dev_main_0.main_address);
+        RA_POWEREX_INFO("[drv ra ops] main 0x%x vsn power off\r\n",ra_dev_main_0.main_address);
     }
     status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_12V,1);
     if(status != BSP_OK){
-        printf("[drv ra ops] main 0x%x 12v power off\r\n",ra_dev_main_0.main_address);
+        RA_POWEREX_INFO("[drv ra ops] main 0x%x 12v power off\r\n",ra_dev_main_0.main_address);
     }
+    //VSP enable or not
     status = ra_dev_main_0.ops->set_power_en(ra_dev_main_0.dev,RA_POWER_VSP,1);
     if(status != BSP_OK){
-        printf("[drv ra ops] main 0x%x vsp power off\r\n",ra_dev_main_0.main_address);
+        RA_POWEREX_INFO("[drv ra ops] main 0x%x vsp power off\r\n",ra_dev_main_0.main_address);
     }
-    RA_POWEREX_DEBUG("VDDIO,MVDD,VSN,iovcc,VCI enabled, VSP disabled\r\n");
+    RA_POWEREX_INFO("Enable all power supplies on the small board\r\n");
+    
 
 }

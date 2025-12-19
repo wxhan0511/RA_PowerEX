@@ -110,8 +110,10 @@ int main(void)
   MX_TIM2_Init();
   MX_SPI3_Init();
   MX_USART1_UART_Init();
+  
   bsp_init();
-  //test_gtb_task();
+  
+  test_gtb_task();
   /* Init scheduler */
   osKernelInitialize(); /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();

@@ -38,18 +38,18 @@ void tp_spi_cs_enable(bool state)
 {
     if(state == true){
         HAL_GPIO_WritePin(TSPI_CS_GPIO_Port, TSPI_CS_Pin, 0);
-        printf("CS Low\r\n");
+        GTB_DEBUG("CS Low\r\n");
     }
     else{
         HAL_GPIO_WritePin(TSPI_CS_GPIO_Port, TSPI_CS_Pin, 1);
-        printf("CS High\r\n");
+        GTB_DEBUG("CS High\r\n");
     }
 }
 void bsp_gtb_init(uint8_t mode){
 
     /* Set the SPI parameters */
     hspi_tp.Instance               = SPI2;
-    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;//SPI 5.25MHz
+    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
     hspi_tp.Init.Direction         = SPI_DIRECTION_2LINES;
     hspi_tp.Init.CLKPhase          = SPI_PHASE_1EDGE;
     hspi_tp.Init.CLKPolarity       = SPI_POLARITY_LOW;
@@ -64,26 +64,19 @@ void bsp_gtb_init(uint8_t mode){
 
     tp_spi_cs_enable(false);
     //註冊回調
-    if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_ERROR_CB_ID, HAL_SPI_ErrorCallback) != HAL_OK) {
-        Error_Handler();
-    }
-    if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_ABORT_CB_ID, HAL_SPI_AbortCpltCallback) != HAL_OK) {
-        Error_Handler();
-    }
-    /* 注册传输完成回调（TXRX 完成） */
-    if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_TX_RX_COMPLETE_CB_ID, HAL_SPI_TxRxCpltCallback) != HAL_OK) {
-        Error_Handler();
-    }
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    GPIO_InitStruct.Pin = TSPI_INT_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-    HAL_GPIO_Init(TSPI_INT_GPIO_Port, &GPIO_InitStruct);
-    //TODO:
+    // if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_ERROR_CB_ID, HAL_SPI_ErrorCallback) != HAL_OK) {
+    //     Error_Handler();
+    // }
+    // if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_ABORT_CB_ID, HAL_SPI_AbortCpltCallback) != HAL_OK) {
+    //     Error_Handler();
+    // }
+    // /* 注册传输完成回调（TXRX 完成） */
+    // if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_TX_RX_COMPLETE_CB_ID, HAL_SPI_TxRxCpltCallback) != HAL_OK) {
+    //     Error_Handler();
+    // }
     /* EXTI interrupt init*/
-    // HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
-    // HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+    //HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 0);
+    //HAL_NVIC_EnableIRQ(EXTI4_IRQn);
    
 }
 
@@ -95,14 +88,14 @@ void ex_ti_initial(tp_config_t *tp_config,FunctionalState state){
         if(tp_config->ex_ti_flag == true)
             return;
         tp_config->ex_ti_flag = true;
-        HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
-        HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+        HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+        HAL_NVIC_EnableIRQ(EXTI4_IRQn);
     }
     else if(state == DISABLE){
 //        if (tp_config->ex_ti_flag == false)
 //            return;
 
-        HAL_NVIC_DisableIRQ(EXTI1_IRQn);
+        HAL_NVIC_DisableIRQ(EXTI4_IRQn);
         tp_config->ex_ti_flag = false;
     }
 }
@@ -123,7 +116,8 @@ HAL_StatusTypeDef spi_read_write_data2( uint8_t *write_data, uint8_t *read_data,
 {
     HAL_StatusTypeDef status = HAL_OK;
     //status = HAL_SPI_TransmitReceive_IT(&hspi_tp,write_data,read_data,write_size+read_size);
-    status = HAL_SPI_TransmitReceive(&hspi_tp,write_data,read_data,write_size+read_size,10);
+    status = HAL_SPI_TransmitReceive(&hspi_tp,write_data,read_data,write_size+read_size,100);
+    
     GTB_DEBUG("spi_read_write_data2 status(HAL_OK:0): %d\r\n",status);
     if (status != HAL_OK) GTB_INFO("[error] gtb read write irq %d \r\n",status);
     else spi_rx_tx_flag=1;
@@ -172,7 +166,11 @@ HAL_StatusTypeDef spi_read_write_data3( uint8_t *write_data, uint8_t *read_data,
 {
 
     HAL_StatusTypeDef status = HAL_OK;
-    status = HAL_SPI_Receive_IT(&hspi_tp,read_data,write_size+read_size);
+    printf("AAA\r\n");
+    status = HAL_SPI_Receive(&hspi_tp,read_data,write_size+read_size,100);
+    printf("BBB\r\n");
+    if (status == HAL_OK)
+        spi_rx_flag = 1;
     while(spi_rx_flag == 0) {}
     spi_rx_flag = 0;
     return status;
@@ -296,7 +294,12 @@ HAL_StatusTypeDef gtb_write_data(tp_config_t *tp_config,bool mode,uint8_t *pData
         //     for (uint8_t i=0;i<data_len;i++)
         //         GTB_DEBUG("0x%x ",pData[i]);
         // }
-        GTB_DEBUG("\r\n");
+        //for (uint8_t i=0;i<data_len;i++)
+        //{
+        //    GTB_INFO("0x%x, ",pData[i]);
+        //}
+        //GTB_INFO("\r\n");
+        //GTB_INFO("-----------------------------------------------------------------\r\n");
         if (tp_config->cs_high_en == true)
         {
             tp_config->transfer_flag = true;
