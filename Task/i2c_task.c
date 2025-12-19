@@ -108,19 +108,16 @@ void MasterTxTask(void *argument)
 
   for (;;)
   {
-
-
     if (osSemaphoreAcquire(i2c1Semaphore, I2C_TIMEOUT) == osOK)
     {
-
-      // Real_time_sampling_of_current_data = raw_data_queue_get_data(raw_data_queue_head - 1);
-      // uint8_t a = raw_data_queue_get_index(raw_data_queue_head - 1);
       __disable_irq();
       for (uint8_t i = 0; i < 8; i++)
       {
+        
         latest_sample_raw_data[i] = raw_data_queue_get_data(raw_data_queue_head - 1 - i);
         latest_sample_index[i] = raw_data_queue_get_index(raw_data_queue_head - 1 - i);
       }
+      __enable_irq();
       
       //从latest_sample_index[i]获取通道号
       for(uint8_t i = 0; i < 8; i++)
@@ -195,7 +192,7 @@ void MasterTxTask(void *argument)
       osSemaphoreRelease(i2c1Semaphore);
       __enable_irq();
     }
-    osDelay(200);
+    osDelay(1000);
 
   }
 }

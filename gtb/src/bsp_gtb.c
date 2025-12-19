@@ -49,7 +49,7 @@ void bsp_gtb_init(uint8_t mode){
 
     /* Set the SPI parameters */
     hspi_tp.Instance               = SPI2;
-    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
     hspi_tp.Init.Direction         = SPI_DIRECTION_2LINES;
     hspi_tp.Init.CLKPhase          = SPI_PHASE_1EDGE;
     hspi_tp.Init.CLKPolarity       = SPI_POLARITY_LOW;
@@ -63,17 +63,6 @@ void bsp_gtb_init(uint8_t mode){
     tp_spi_set_mode(mode);
 
     tp_spi_cs_enable(false);
-    //註冊回調
-    // if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_ERROR_CB_ID, HAL_SPI_ErrorCallback) != HAL_OK) {
-    //     Error_Handler();
-    // }
-    // if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_ABORT_CB_ID, HAL_SPI_AbortCpltCallback) != HAL_OK) {
-    //     Error_Handler();
-    // }
-    // /* 注册传输完成回调（TXRX 完成） */
-    // if (HAL_SPI_RegisterCallback(&hspi_tp, HAL_SPI_TX_RX_COMPLETE_CB_ID, HAL_SPI_TxRxCpltCallback) != HAL_OK) {
-    //     Error_Handler();
-    // }
     /* EXTI interrupt init*/
     //HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 0);
     //HAL_NVIC_EnableIRQ(EXTI4_IRQn);
@@ -116,7 +105,7 @@ HAL_StatusTypeDef spi_read_write_data2( uint8_t *write_data, uint8_t *read_data,
 {
     HAL_StatusTypeDef status = HAL_OK;
     //status = HAL_SPI_TransmitReceive_IT(&hspi_tp,write_data,read_data,write_size+read_size);
-    status = HAL_SPI_TransmitReceive(&hspi_tp,write_data,read_data,write_size+read_size,100);
+    status = HAL_SPI_TransmitReceive(&hspi_tp,write_data,read_data,write_size+read_size,10);
     
     GTB_DEBUG("spi_read_write_data2 status(HAL_OK:0): %d\r\n",status);
     if (status != HAL_OK) GTB_INFO("[error] gtb read write irq %d \r\n",status);

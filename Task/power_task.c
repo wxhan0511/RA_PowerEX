@@ -96,6 +96,6 @@ void PowerTask(void *argument)
             }
         }
 
-        osDelay(100);
+        osDelay(200);
     }
 }
