@@ -91,8 +91,9 @@ extern TIM_HandleTypeDef htim6;
 
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 extern tp_config_t tp_config_hid;
-
+extern volatile int spi_rx_flag;
 extern volatile int spi_rx_tx_flag;
+extern volatile int spi_tx_flag;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -229,7 +230,10 @@ void EXTI3_IRQHandler(void)
 
   /* USER CODE END EXTI1_IRQn 1 */
 }
-
+void EXTI4_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(TSPI_INT_Pin);
+}
 /**
  * @brief This function handles DMA1 stream0 global interrupt.
  */
@@ -664,19 +668,38 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
      if(hspi->Instance == SPI2){
          spi_rx_tx_flag = 1;
-         GTB_INFO("spi_rx_tx_flag set 1\r\n");
+         //printf("SPI2 TxRx Complete\r\n");
      }
     if(hspi->Instance == SPI3){
-         GTB_INFO("spi3_rx_tx\r\n");
      }
 
 }
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+    if(hspi->Instance == SPI2) {
+        spi_tx_flag = 1;
+    }
+}
+
+
+
+void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+    if(hspi->Instance == SPI2) {
+        spi_rx_flag = 1;
+    }
+}
+
 void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi)
 {
-    if (hspi == &hspi_tp) {
-        // 处理错误
-        GTB_INFO("[SPI ERROR] code=%lu\r\n", HAL_SPI_GetError(hspi));
-    }
+  uint32_t err = HAL_SPI_GetError(hspi);
+  if (err & HAL_SPI_ERROR_OVR) {
+    __HAL_SPI_CLEAR_OVRFLAG(hspi);
+  }
+
+  if (hspi == &hspi_tp) {
+    GTB_INFO("[SPI ERROR] code=%lu\r\n", err);
+  }
 }
 
 void HAL_SPI_AbortCpltCallback(SPI_HandleTypeDef *hspi)
@@ -803,12 +826,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 #endif
   }
   //for GTB //TODO：
-  if (GPIO_Pin == GPIO_PIN_1)
+  if (GPIO_Pin == GPIO_PIN_4)
   {
+    
     if((tp_config_hid.transfer_flag == false) && (tp_config_hid.int_trans == true))
       {
+          //printf("int_flag = true\r\n");
           //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
           tp_config_hid.int_flag = true;
+          HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
+          HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
+          //printf("tp_config_hid.int_flag\r\n");
           //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_RESET);
           //osEventFlagsSet(event_Flags1_ID,0x01U<<1);  /* ??��Test_Flags????flag0 */
       }

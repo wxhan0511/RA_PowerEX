@@ -16,6 +16,7 @@
 #include "drv_defines.h"
 #include "bsp_i2c_bus.h"
 #include "bsp_multi_channel_sel.h"
+#include "debug.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -63,7 +64,11 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
     switch (power_name) {
         case RA_POWER_VSP:
             if((power_value < 24) || (power_value > 84))
+            {
+                RA_POWEREX_INFO("VSP power value error %d\r\n",power_value);
+                RA_POWEREX_INFO("VSP range 24-84\r\n");
                 return BSP_ERROR;
+            }
             else{
                 if(power_value >= 40)
                     temp_data = power_value - 40;
@@ -75,7 +80,11 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
             break;
         case RA_POWER_VSN:
             if((power_value < 24) || (power_value > 64))
+            {
+                RA_POWEREX_INFO("VSN power value error %d\r\n",power_value);
+                RA_POWEREX_INFO("VSN range 24-64\r\n");
                 return BSP_ERROR;
+            }
             else{
                 if(power_value >= 40)
                     temp_data = power_value - 40;
@@ -87,7 +96,11 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
             break;
         case RA_POWER_VCI:
             if((power_value < 10) || (power_value > 35))
+            {
+                RA_POWEREX_INFO("VCI power value error %d\r\n",power_value);
+                RA_POWEREX_INFO("VCI range 10-35\r\n");
                 return BSP_ERROR;
+            }
             else{
                 temp_data = power_value - 10;
                 status = dev->lp3907->write(RA_LP3907_1_ADDRESS,0x10,0x75);
@@ -97,7 +110,11 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
             break;
         case RA_POWER_IOVCC:
             if((power_value < 10) || (power_value > 35))
+            {
+                RA_POWEREX_INFO("IOVCC power value error %d\r\n",power_value);
+                RA_POWEREX_INFO("IOVCC range 10-35\r\n");
                 return BSP_ERROR;
+            }
             else{
                 temp_data = power_value - 10;
                 status = dev->lp3907->write(RA_LP3907_1_ADDRESS,0x10,0x75);
@@ -108,7 +125,11 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
             break;
         case RA_POWER_MVDD:
             if((power_value < 10) || (power_value > 35))
+            {
+                RA_POWEREX_INFO("MVDD power value error %d\r\n",power_value);
+                RA_POWEREX_INFO("MVDD range 10-35\r\n");
                 return BSP_ERROR;
+            }
             else{
                 temp_data = power_value - 10;
                 status = dev->lp3907->write(RA_LP3907_2_ADDRESS,0x10,0x75);
@@ -118,7 +139,11 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
             break;
         case RA_POWER_VDDIO:
             if((power_value < 10) || (power_value > 35))
+            {
+                RA_POWEREX_INFO("VDDIO power value error %d\r\n",power_value);
+                RA_POWEREX_INFO("VDDIO range 10-35\r\n");
                 return BSP_ERROR;
+            }
             else{
                 temp_data = power_value - 10;
                 status = dev->lp3907->write(RA_LP3907_2_ADDRESS,0x10,0x75);

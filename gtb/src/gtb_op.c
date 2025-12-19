@@ -72,6 +72,7 @@ int32_t  gtb_read_raw_data_gc(bool interface,uint8_t ic_type_index,uint16_t len)
         //printf("read raw %d %d \r\n",ic_type_index,len);
         if((ic_type_index == IC_INDEX_GC_7271) && (len > 1024))
         {
+            printf("bb\r\n");
             tp_spi_cs_enable(true);
             //delay_us(10);
             status = spi_read_write_data1(pVoid, &touch_data_demo_raw_data[0], 1024, 0);
@@ -93,6 +94,7 @@ int32_t  gtb_read_raw_data_gc(bool interface,uint8_t ic_type_index,uint16_t len)
             //status = spi_read_data2(touch_data_demo_raw_data, len);
             status = spi_read_write_data3(pVoid, touch_data_demo_raw_data, len, 0);
             tp_spi_cs_enable(false);
+            
 
         }
     }
@@ -128,12 +130,17 @@ uint16_t gtb_get_debug_data_index(uint8_t ic_type_index)
 int32_t gtb_read_raw_data(tp_config_t *tp_config,bool interface,uint8_t ic_type_index,uint16_t len)
 {
     int32_t status = 0;
+    //printf("interface=%x\r\n",interface);
+    //printf("ic_type_index=0x%x\r\n",ic_type_index);
+    //printf("gtb_read_raw_data: len=%d\r\n",len);
+    //printf("tp_config->ic_type_index & 0x0f=0x%x\r\n",(tp_config->ic_type_index & 0x0f));
     if(len > MAXTOUCHDATASIZE)
         len = MAXTOUCHDATASIZE;
     switch(tp_config->ic_type_index & 0x0f)
     {
         case IC_TYPE_GC:
             status = gtb_read_raw_data_gc(interface,ic_type_index,len);
+            //printf("after gtb_read_raw_data_gc\r\n");
             break;
         default:
             break;
@@ -205,7 +212,7 @@ void gtb_global_var_init(tp_config_t *tp_config)
     tp_config->int_trans = true;
     tp_config->fw_mode = FWMODE_DISABLE;
     tp_config->raw_data_flag = false;
-    tp_config->long_packet_enable = false;
+    tp_config->long_packet_enable = true;
     tp_config->long_packet_count = 0;
     tp_config->ic_touch_data_len = 0;
     tp_config->ic_touch_data_index = 0;
