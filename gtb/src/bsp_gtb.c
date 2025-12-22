@@ -155,9 +155,7 @@ HAL_StatusTypeDef spi_read_write_data3( uint8_t *write_data, uint8_t *read_data,
 {
 
     HAL_StatusTypeDef status = HAL_OK;
-    printf("AAA\r\n");
     status = HAL_SPI_Receive(&hspi_tp,read_data,write_size+read_size,100);
-    printf("BBB\r\n");
     if (status == HAL_OK)
         spi_rx_flag = 1;
     while(spi_rx_flag == 0) {}

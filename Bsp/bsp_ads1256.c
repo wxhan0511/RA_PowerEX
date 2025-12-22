@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tgmath.h>
-#include <stdbool.h>
 
 #include "bsp.h"
 #include "bsp_dwt.h"
@@ -19,74 +18,19 @@
 float raw_data_queue[RAW_DATA_QUEUE_SIZE] __attribute__((section(".raw_data_queue"))) __attribute__((aligned(4))); // align 4B , size 4092
 uint8_t raw_data_index_queue[RAW_DATA_INDEX_QUEUE_SIZE] __attribute__((section(".raw_data_index_queue")));
 volatile uint16_t raw_data_queue_head = 0;
-volatile uint16_t raw_data_queue_tail = 0;
-
-static inline uint16_t raw_data_next(uint16_t pos)
-{
-    return (uint16_t)((pos + 1) % RAW_DATA_QUEUE_SIZE);
-}
-
-static inline bool raw_data_queue_is_empty(void)
-{
-    return raw_data_queue_head == raw_data_queue_tail;
-}
-
-static inline bool raw_data_queue_is_full(void)
-{
-    return raw_data_next(raw_data_queue_head) == raw_data_queue_tail;
-}
 
 /**
  * @brief push data value and index into the ring buffer
  * @param value data value to be pushed
  * @param index data index to be pushed
  */
-// ISR 生产者：仅在中断上下文调用，避免耗时操作
-bool raw_data_queue_push_isr(float value, uint8_t index)
+void raw_data_queue_push(float value , uint8_t index)
 {
-    uint16_t next = raw_data_next(raw_data_queue_head);
-    if (next == raw_data_queue_tail)
-    {
-        // 队列满：丢弃新数据以避免阻塞；也可选择覆盖最旧数据
-        return false;
-    }
+
     raw_data_queue[raw_data_queue_head] = value;
     raw_data_index_queue[raw_data_queue_head] = index;
-    raw_data_queue_head = next;
-    return true;
-}
+    raw_data_queue_head = (raw_data_queue_head + 1) % RAW_DATA_QUEUE_SIZE;
 
-// 任务生产者：任务上下文可写入，使用简短临界区保护 head/tail
-bool raw_data_queue_push_task(float value, uint8_t index)
-{
-    bool ok = false;
-    __disable_irq();
-    uint16_t next = raw_data_next(raw_data_queue_head);
-    if (next != raw_data_queue_tail)
-    {
-        raw_data_queue[raw_data_queue_head] = value;
-        raw_data_index_queue[raw_data_queue_head] = index;
-        raw_data_queue_head = next;
-        ok = true;
-    }
-    __enable_irq();
-    return ok;
-}
-
-// 任务消费者：弹出元素，使用简短临界区保护 tail 更新
-bool raw_data_queue_pop(float *value, uint8_t *index)
-{
-    bool ok = false;
-    __disable_irq();
-    if (!raw_data_queue_is_empty())
-    {
-        *value = raw_data_queue[raw_data_queue_tail];
-        *index = raw_data_index_queue[raw_data_queue_tail];
-        raw_data_queue_tail = raw_data_next(raw_data_queue_tail);
-        ok = true;
-    }
-    __enable_irq();
-    return ok;
 }
 /**
  * @brief get the index value from the ring buffer
@@ -114,7 +58,6 @@ uint8_t raw_data_queue_get_index(uint16_t index)
  */
 float raw_data_queue_get_data(uint16_t index)
 {
-    
     if (0 <= index && index < RAW_DATA_QUEUE_SIZE)
     {
         return raw_data_queue[index];
@@ -530,9 +473,9 @@ void bsp_ads1256_irq_handle(ads1256_dev_t* handle)
         {   
             const double raw_data = handle->data_buffer_avg[handle->last_channel]*ADC_RATIO*0.000001;
             //printf("channel %d raw data %f \r\n",handle->last_channel,raw_data);
-            if (raw_data != 0.0)
+            if(raw_data != 0.0)
             {
-                (void)raw_data_queue_push_isr(raw_data, handle->last_channel);   // 中断上下文安全推送
+                raw_data_queue_push(raw_data , handle->last_channel);   //push data and index(corresponding channel) to ring queue
             }
             //AD_DATA_DEBUG("channel %d raw data %f \r\n",handle->last_channel,raw_data);
 

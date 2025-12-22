@@ -99,9 +99,6 @@ void bsp_init()
     MX_USB_OTG_HS_PCD_Init();
     MX_USB_DEVICE_Init();
     ra_xb_Power_Init();
-
-
-
     RA_POWEREX_INFO("------------- bsp init finish -------------\r\n");
 }
 /**
@@ -308,6 +305,4 @@ static void ra_xb_Power_Init(void)
         RA_POWEREX_INFO("[drv ra ops] main 0x%x vsp power off\r\n",ra_dev_main_0.main_address);
     }
     RA_POWEREX_INFO("Enable all power supplies on the small board\r\n");
-    
-
 }

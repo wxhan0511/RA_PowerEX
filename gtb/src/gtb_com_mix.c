@@ -1694,11 +1694,11 @@ void gtb_fw_mode_com(tp_config_t *tp_config,uint8_t *arg, uint8_t *output, uint8
                             gtb_fs_transmit(output, 64, com_mode);
                             //printf("222\r\n");
                             //printf("j=%d\r\n", j);
-                            //osDelay(1);
+                            osDelay(1);
 
                             if ((j != (tp_config->fw_data_len - 1)) || (tp_config->fw_data_len1 != 0))
                             {
-                                //osDelay(1 + tp_config->raw_data_delay_time);
+                                osDelay(1 + tp_config->raw_data_delay_time);
                                 //	                            delay_us(200);
                             }
                         }
