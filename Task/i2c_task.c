@@ -19,12 +19,12 @@ osThreadId_t slaveRxTaskHandle = NULL;
 
 const osThreadAttr_t masterTxTask_attributes = {
     .name = "MasterTxTask",
-    .priority = osPriorityHigh7,
+    .priority = osPriorityNormal,
     .stack_size = 128 * 4};
 
 const osThreadAttr_t masterRxTask_attributes = {
     .name = "MasterRxTask",
-    .priority = osPriorityHigh7,
+    .priority = osPriorityNormal,
     .stack_size = 128 * 4};
 const osThreadAttr_t slaveTxTask_attributes = {
     .name = "SlaveTxTask",
@@ -99,7 +99,7 @@ void MasterRxTask(void *argument)
 
 }
 
-// 主机发送任务
+// 主机发送任务 I2C1
 void MasterTxTask(void *argument)
 {
   OLED_Init();//OLED初始
@@ -110,14 +110,16 @@ void MasterTxTask(void *argument)
   {
     if (osSemaphoreAcquire(i2c1Semaphore, I2C_TIMEOUT) == osOK)
     {
-      __disable_irq();
+      //;
+      HAL_NVIC_DisableIRQ(EXTI3_IRQn);//Prevent interrupt data competition
       for (uint8_t i = 0; i < 8; i++)
       {
         
         latest_sample_raw_data[i] = raw_data_queue_get_data(raw_data_queue_head - 1 - i);
         latest_sample_index[i] = raw_data_queue_get_index(raw_data_queue_head - 1 - i);
       }
-      __enable_irq();
+      //__enable_irq();
+      HAL_NVIC_EnableIRQ(EXTI3_IRQn);
       
       //从latest_sample_index[i]获取通道号
       for(uint8_t i = 0; i < 8; i++)
@@ -190,7 +192,6 @@ void MasterTxTask(void *argument)
       //OLED_Showdecimal(0,6,num2,2,3,12, 0);
       //OLED_HorizontalShift(0x26);//全屏水平向右滚动播放
       osSemaphoreRelease(i2c1Semaphore);
-      __enable_irq();
     }
     osDelay(1000);
 
