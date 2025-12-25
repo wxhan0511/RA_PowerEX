@@ -35,9 +35,7 @@ extern "C" {
 #define RA_LP3907_2_MVDD_CMD     0x39
 #define RA_LP3907_2_VDDIO_CMD    0x3A
 
-/* I2C buffers */
-extern uint8_t tx_buf[33];  // Transmit buffer
-extern uint8_t rx_buf[33];  // Receive buffer
+
 
 /* I2C handles */
 extern I2C_HandleTypeDef hi2c1;

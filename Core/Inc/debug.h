@@ -59,13 +59,15 @@ extern "C" {
 #else
     #define GTB_DEBUG(fmt, ...)          do {} while(0)
 #endif
+
+#define I2C_INFO(fmt, ...)          printf("[I2C INFO] " fmt, ##__VA_ARGS__)
+#define I2C_ERROR(fmt, ...)          printf("[I2C ERROR] " fmt, ##__VA_ARGS__)
 #define I2C_DEBUG_ENABLE
 #ifdef I2C_DEBUG_ENABLE
-    #define I2C_DEBUG(fmt, ...)          printf("[I2C DEBUG] " fmt, ##__VA_ARGS__)
-    #define I2C_INFO(fmt, ...)          printf("[I2C INFO] " fmt, ##__VA_ARGS__)
+    #define I2C_DEBUG(fmt, ...)          printf(fmt, ##__VA_ARGS__)
+    
 #else
     #define I2C_DEBUG(fmt, ...)          do {} while(0)
-    #define I2C_INFO(fmt, ...)          do {} while(0)
 #endif
 
 // #define AD_DATA_DEBUG_ENABLE

@@ -102,23 +102,21 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_I2C1_Init();//level shifter I2C1
-  MX_I2C2_Init();
+  MX_I2C1_Init();//level shifter, DAC control, screen display
+  MX_I2C2_Init();//RA_XB
   MX_SPI1_Init();
 
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_SPI3_Init();
   MX_USART1_UART_Init();
-  
   bsp_init();
-  
   //test_gtb_task();
   /* Init scheduler */
   osKernelInitialize(); /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
   /* Start scheduler */
-  osKernelStart();
+  osKernelStart(); 
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */

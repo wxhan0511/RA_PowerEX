@@ -20,21 +20,11 @@ BSP_STATUS_T bsp_i2c_bus_hw_write_data(void *handle, uint8_t address, uint8_t co
         ;
     if (status == HAL_OK)
     {
-        printf("BSP ok\r\n");
         return BSP_OK;
     }
     else
     {
-        printf("BSP error\r\n");
-        // if (I2C_IsSDALow(handle,GPIOB,GPIO_PIN_10,GPIO_PIN_11)) {
-        // // 如果 SDA 被拉低，调用恢复函数
-        // I2C_RecoverSDA(handle,GPIOB,GPIO_PIN_10,GPIO_PIN_11);
-        // }
-        // if (I2C_IsSCLLow(handle,GPIOB,GPIO_PIN_10,GPIO_PIN_11)) {
-        // // 如果 SCL 被拉低，调用恢复函数
-        // I2C_RecoverSCL(handle,GPIOB,GPIO_PIN_10,GPIO_PIN_11);
-        // }
-        // MX_I2C2_Init();
+        printf("i2c2 error\r\n");
         return BSP_ERROR;
     }
 }

@@ -4646,7 +4646,7 @@ HAL_StatusTypeDef HAL_I2C_EnableListen_IT(I2C_HandleTypeDef *hi2c)
     }
 
     /* Enable Address Acknowledge */
-    SET_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
+    SET_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);//1: Acknowledge returned after a byte is received (matched address or data)
 
     /* Enable EVT and ERR interrupt */
     __HAL_I2C_ENABLE_IT(hi2c, I2C_IT_EVT | I2C_IT_ERR);

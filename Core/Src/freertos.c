@@ -38,16 +38,14 @@ void MX_FREERTOS_Init(void)
 #ifdef GTB
   server_gtb_init();
 #endif
-  I2C_Semaphore_Init();
-#ifdef I2C_SLAVE
+
   slave_rx_task_init();
-  slave_tx_task_init();
-#endif
-#ifdef I2C_MASTER
-  master_tx_task_init();
+  //slave_tx_task_init();
+
+  //master_tx_task_init();
   master_rx_task_init();
-#endif
-  power_task_init();
+
+  //power_task_init();
 }
 
 
