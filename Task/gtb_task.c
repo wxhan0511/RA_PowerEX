@@ -110,10 +110,7 @@ void server_gtb(void *argument)
     osTimerStart(led_timerHandle, 1000);
 #endif
     GTB_INFO("[gtb task] active \r\n");
-    //uint32_t send_cnt = 0;
-    //uint8_t test_data[64] = {1,0,1,0,1,0,1,0};
-    //USBD_CUSTOM_HID_SendReport(&hUsbDevice, test_data, 64);
-    //CDC_Transmit(0,test_data, sizeof(test_data));
+    GTB_INFO("CDC need closed\r\n");
     hid_state_fs = 0;
     bsp_gtb_init(3);
     gtb_global_var_init(&tp_config_hid);

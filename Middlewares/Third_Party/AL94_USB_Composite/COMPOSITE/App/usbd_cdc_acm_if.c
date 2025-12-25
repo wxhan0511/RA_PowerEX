@@ -28,7 +28,7 @@
 #include "calibration_utils.h"
 #include "main.h"               //Io defination and debug macro
 #include "bsp.h"                //import version
-#include "cdc_task.h"           //CDC private type define
+#include "power_control.h"
 #include "stm32f4xx_hal_gpio.h" //addr recon
 /*ra xb*/
 #include "drv_ra_device.h"

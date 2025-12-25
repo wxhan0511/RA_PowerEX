@@ -28,14 +28,8 @@
 #include "i2c_utils.h"
 #include "calibration_utils.h"
 #include "bsp_gtb.h"
-// volatile uint8_t cmd = 0;  // Command from host computer
-// int16_t power_data = 0; // Voltage or current data, in mV or mA, is sent to the host computer
-// float offset, gain;
-// HAL_StatusTypeDef ret = HAL_ERROR;
-// float latest_sample_raw_data[8] = {0}; // Store the latest sampled raw data for 8 channel
-// uint16_t latest_sample_data[8] = {0}; // Store the latest sampled data for 8 channel after conversion and calibration
-// uint8_t latest_sample_index[8] = {0}; // Store the corresponding index of the latest sampled data for 8 channel
-// float IV_data = 0.0f; // Voltage or current data before calibration
+#include "i2c_task.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -57,7 +51,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+volatile uint16_t offset = 0; // Declare offset as a global variable
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,6 +88,8 @@ extern tp_config_t tp_config_hid;
 extern volatile int spi_rx_flag;
 extern volatile int spi_rx_tx_flag;
 extern volatile int spi_tx_flag;
+
+extern volatile uint8_t i2c1_rx_ready_flag;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -133,15 +129,15 @@ void HardFault_Handler(void)
       "MRSEQ %0, MSP \n"
       "MRSNE %0, PSP \n"
       : "=r"(sp));
-  RA_POWEREX_DEBUG("PC = 0x%08X\r\n", sp[6]);
+  RA_POWEREX_ERROR("PC = 0x%08X\r\n", sp[6]);
   if (SCB->SHCSR & SCB_SHCSR_MEMFAULTENA_Msk) {
-    RA_POWEREX_DEBUG("MemManage\r\n");
+    RA_POWEREX_ERROR("MemManage\r\n");
   }
   if (SCB->SHCSR & SCB_SHCSR_USGFAULTENA_Msk) {
-    RA_POWEREX_DEBUG("UsageFault\r\n");
+    RA_POWEREX_ERROR("UsageFault\r\n");
   }
   if (SCB->SHCSR & SCB_SHCSR_BUSFAULTENA_Msk) {
-    RA_POWEREX_DEBUG("BusFault\r\n");
+    RA_POWEREX_ERROR("BusFault\r\n");
   }
 
 
@@ -306,6 +302,7 @@ void DMA1_Stream6_IRQHandler(void)
 
 /**
  * @brief This function handles I2C1 event interrupt.
+ * I2C1 event interrupts service function (must have) actual data receiving flow
  */
 void I2C1_EV_IRQHandler(void)
 {
@@ -319,6 +316,7 @@ void I2C1_EV_IRQHandler(void)
 
 /**
  * @brief This function handles I2C2 event interrupt.
+ * I2C2 event interrupts service function (must have) actual data receiving flow
  */
 void I2C2_EV_IRQHandler(void)
 {
@@ -471,53 +469,26 @@ void DMA2_Stream7_IRQHandler(void)
   /* USER CODE END DMA2_Stream7_IRQn 1 */
 }
 
-#ifdef I2C_SLAVE
+
 void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
 {
+  offset = 0;
+  i2c1_rx_ready_flag = 1;
+  I2C_DEBUG("I2C Listen Complete Callback\r\n");
   HAL_I2C_EnableListen_IT(hi2c);
 }
 
-
+//I2C device address callback function (The slave will only enter the function in response to the address sent by the host))
 void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode)
 {
   if(TransferDirection == I2C_DIRECTION_TRANSMIT) 
   {
-      HAL_I2C_Slave_Seq_Receive_IT(hi2c, rx_buf, 1, I2C_LAST_FRAME);
+      HAL_I2C_Slave_Seq_Receive_IT(hi2c, i2c1_rx_buf, 2, I2C_LAST_FRAME);
   }
   else
   {
-    cmd = rx_buf[0];
-    for (uint8_t i = 0; i < 8; i++)
-    {
-      latest_sample_raw_data[i] = raw_data_queue_get_data(raw_data_queue_head - 1 - i);
-      latest_sample_index[i] = raw_data_queue_get_index(raw_data_queue_head - 1 - i);
-    }
-    //calibration
-    if(cmd == AD_I_ELVDD || cmd == AD_I_VCC || cmd == AD_I_IOVCC || cmd == AD_I_ELVSS){
-        sel_cali_param((cmd & 0x07), 1, 1, &offset, &gain);
-        IV_data = IV_data * 50 *1e4;
-        if(cmd == AD_I_ELVSS){
-          IV_data = -IV_data; // ELVSS电流为负值
-        }
-        IV_data = gain*IV_data + offset; 
-    }
-    else if(cmd == AD_V_ELVSS || cmd == AD_V_ELVDD || cmd == AD_V_VCC || cmd == AD_V_IOVCC){
-      sel_cali_param((cmd & 0x07), 1, 0, &offset, &gain);
-      IV_data = IV_data * 1e6 * 2.5;
-      if(cmd == AD_V_ELVSS){
-        IV_data = -IV_data; // ELVSS电压为负值
-      }
-      IV_data = gain*IV_data + offset; 
-    }
-    else{
-    }
-    power_data = float_to_int16_round(IV_data);    
-    //send data to host computer
-    memcpy(tx_buf, &power_data, 2);
-
-    HAL_I2C_Slave_Seq_Transmit_IT(hi2c, tx_buf, 2, I2C_LAST_FRAME);
+    HAL_I2C_Slave_Seq_Transmit_IT(hi2c, i2c1_tx_buf, 1, I2C_NEXT_FRAME);
   }
-  HAL_I2C_EnableListen_IT(hi2c);
 }
 
 void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
@@ -617,26 +588,14 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
 
 void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
-  //offset++;
-  //HAL_StatusTypeDef ret = HAL_I2C_Slave_Seq_Receive_IT(hi2c, &rx_buf[0], 1, I2C_NEXT_FRAME);
-  //I2C_DEBUG("I2C Slave Receive 1 byte rx_buf[%d]: %d\r\n", offset-1 , rx_buf[offset-1]);
 
-  //HAL_I2C_Slave_Seq_Transmit_IT(hi2c, tx_buf, 2, I2C_NEXT_FRAME);
-  //I2C_DEBUG("I2C Slave Transmit 2 bytes: %d, %d\r\n", tx_buf[0], tx_buf[1]);
 }
 
 void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
-{                                                                            
-  //HAL_I2C_Slave_Seq_Transmit_IT(hi2c, tx_buf, 2, I2C_NEXT_FRAME);
-  //I2C_DEBUG("I2C Slave Transmit 2 bytes: %d, %d\r\n", tx_buf[0], tx_buf[1]);
-
-  //HAL_StatusTypeDef ret = HAL_I2C_Slave_Seq_Receive_IT(hi2c, &rx_buf[0], 1, I2C_NEXT_FRAME);
-  //I2C_DEBUG("I2C Slave Receive 1 byte rx_buf[%d]: %d\r\n", offset-1 , rx_buf[offset-1]);
+{     
 
 }
-#endif
 
-#ifdef I2C_MASTER
 // I2C中断回调
 void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
@@ -648,12 +607,7 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
   printf("Master received ...\r\n");
 }
 
-void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
-{
-  HAL_I2C_DeInit(&hi2c1);
-  HAL_I2C_Init(&hi2c1);
-}
-#endif
+
 void I2C1_ER_IRQHandler(void)
 {
   HAL_I2C_ErrorCallback(&hi2c1);
@@ -830,20 +784,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     // bsp_ads1256_irq_handle(&dev_cur);
 #endif
   }
-  //for GTB //TODO：
   if (GPIO_Pin == GPIO_PIN_4)
   {
     
     if((tp_config_hid.transfer_flag == false) && (tp_config_hid.int_trans == true))
       {
-          //printf("int_flag = true\r\n");
-          //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
           tp_config_hid.int_flag = true;
-          HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
-          HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
-          //printf("tp_config_hid.int_flag\r\n");
-          //HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_RESET);
-          //osEventFlagsSet(event_Flags1_ID,0x01U<<1);  /* ??��Test_Flags????flag0 */
       }
 
 

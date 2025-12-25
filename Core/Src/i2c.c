@@ -69,14 +69,10 @@ void MX_I2C1_Init(void)
   hi2c1.Instance = I2C1;
   hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-#ifdef I2C_MASTER
-  hi2c1.Init.OwnAddress1 = 0x0; // Master address
-#else
-  hi2c1.Init.OwnAddress1 = SLAVE_ADDR; // Slave address
-#endif
+  hi2c1.Init.OwnAddress1 = SLAVE_ADDR; // Slave address , master mode ignored
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = SLAVE_ADDR1;
+  hi2c1.Init.OwnAddress2 = SLAVE_ADDR1;// Slave address1 , master mode ignored
   hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
@@ -106,7 +102,7 @@ void MX_I2C2_Init(void)
   hi2c2.Instance = I2C2;
   hi2c2.Init.ClockSpeed = 100000;
   hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
-#ifdef I2C_MASTER
+#ifdef I2C2_MASTER
   hi2c2.Init.OwnAddress1 = 0x0; // Master address, 0x30 is the 7-bit address
 #else
   hi2c2.Init.OwnAddress1 = SLAVE_ADDR;//mother board define slave address

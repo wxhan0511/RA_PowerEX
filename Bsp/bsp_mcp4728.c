@@ -41,16 +41,8 @@ void  bsp_dac_init(dac_dev_t *dev)
     ELVSS_DISABLE();
     IOVCC_DISABLE();
     VCC_DISABLE();
-    //写死电压版本
-    //---------------IOVCC=1.8V、ELVSS=2.224v、VCC=2.72v
-#ifdef RA_POWERSUPPLY_FOR_IC
-    g_calibration_manager.data.iovcc_last_voltage=1620.0f;
-    // g_calibration_manager.data.elvdd_last_voltage=6188.0f; //#1,#2屏
-    g_calibration_manager.data.elvdd_last_voltage=5957.0f; //铁哥给的屏
-    RA_POWEREX_INFO("IOVCC fixed voltage %dmv supplies power to IC\r\n", (uint32_t)g_calibration_manager.data.iovcc_last_voltage);
-    RA_POWEREX_INFO("ELVDD fixed voltage %dmv supplies power to IC\r\n", (uint32_t)g_calibration_manager.data.elvdd_last_voltage);
-#endif
-    //---------------------------------------------
+
+    RA_POWEREX_INFO("Restore the voltage set last time\r\n");
     RA_POWEREX_INFO("ELVDD: %f mV\r\n",  g_calibration_manager.data.elvdd_last_voltage);
     RA_POWEREX_INFO("ELVSS: %f mV\r\n",  g_calibration_manager.data.elvss_last_voltage);
     RA_POWEREX_INFO("IOVCC: %f mV\r\n",  g_calibration_manager.data.iovcc_last_voltage);
@@ -87,16 +79,11 @@ void  bsp_dac_init(dac_dev_t *dev)
         CDC_DEBUG("VCC set voltage failed\r\n");
     }
     HAL_GPIO_WritePin(LDAC_Port, LDAC_Pin, GPIO_PIN_RESET);
-    //写死电压版本---------------IOVCC=1.8V、VCC=5.3v、ELVDD=8.8v
-    // ELVDD_ENABLE();
-    //------------------------------------
+   
     ELVDD_ENABLE();
     ELVSS_ENABLE();
     IOVCC_ENABLE();
     VCC_ENABLE();
-    CDC_DEBUG("IOVCC and VCC enabled\r\n");
-    CDC_DEBUG("ELVDD and ELVSS disabled\r\n");
-
 
     // dac_dev.val[0] = 1200; // Set default voltage for ELVDD+  7000 先不上电，cs hign 配7V
     // dac_dev.val[1] = 1500; // Set default voltage for ELVSS-    0

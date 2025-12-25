@@ -91,13 +91,19 @@ void bsp_init()
     MX_CRC_Init();
     // bsp_test_spi_flash();  //for test flash
     calibration_load(); //If the calibration value does not exist, write the default value
-    //bsp_init_power_control();  //initialize power switch , Not set temporarily, restore the previous switch state and voltage value
-    
+    //bsp_init_power_control();  //initialize power switch
+
     bsp_init_adc_system();
     bsp_level_shift_direction_set(1);
+
+    //Moster mode and listening are mutually exclusive 
+    HAL_I2C_DisableListen_IT(&hi2c1);
     bsp_dac_init(&dac_dev);
+    HAL_I2C_EnableListen_IT(&hi2c1);
+
     MX_USB_OTG_HS_PCD_Init();
     MX_USB_DEVICE_Init();
+    //use i2c2
     ra_xb_Power_Init();
     RA_POWEREX_INFO("------------- bsp init finish -------------\r\n");
 }
@@ -131,7 +137,7 @@ static void bsp_print_version_info(void)
     RA_POWEREX_INFO("Hardware Name: %s\r\n", hw_name);
     RA_POWEREX_INFO("Hardware Version: %d.%d.%d.%d\r\n", 
                        hw_version[0], hw_version[1], hw_version[2], hw_version[3]);
-    RA_POWEREX_INFO("================================================\r\n");
+
 
     // 解析版本号,ID的4位由读IO决定
     io0 = HAL_GPIO_ReadPin(ADDR_RECON_PORT,ADDR0);
@@ -143,6 +149,8 @@ static void bsp_print_version_info(void)
     id = (io3 << 3) | (io2 << 2) | (io1 << 1) | io0;
     // 低 4 位清零（可选，根据需求可修改）
     id = id << 4;
+    RA_POWEREX_INFO("ID Setting from IO Pins: %d%d%d%d => ID: 0x%02X\r\n", io3, io2, io1, io0, id);
+    RA_POWEREX_INFO("================================================\r\n");
 
 }
 
@@ -250,7 +258,7 @@ static void ra_xb_Power_Init(void)
     RA_POWEREX_INFO("vci %fmv\r\n",g_calibration_manager.data.vci_last_voltage);
     RA_POWEREX_INFO("vsp %fmv\r\n",g_calibration_manager.data.vsp_last_voltage);
     RA_POWEREX_INFO("vsn %fmv\r\n",g_calibration_manager.data.vsn_last_voltage);
-#ifdef RA_POWERSUPPLY_FOR_IC    
+#ifdef RA_POWERSUPPLY_FOR_IC_7272    
     //fix vsn as -5.5v,for download initial code
     // g_calibration_manager.data.vsp_last_voltage = 5900; //#1 #2屏
     g_calibration_manager.data.vsn_last_voltage = 6125; //铁哥给的屏

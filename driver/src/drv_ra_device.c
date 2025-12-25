@@ -65,8 +65,7 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
         case RA_POWER_VSP:
             if((power_value < 24) || (power_value > 84))
             {
-                RA_POWEREX_INFO("VSP power value error %d\r\n",power_value);
-                RA_POWEREX_INFO("VSP range 24-84\r\n");
+                RA_POWEREX_INFO("The vsp voltage is %d *100*mv and is not set within the range of 24 to 84, error\r\n",power_value);
                 return BSP_ERROR;
             }
             else{
@@ -81,8 +80,7 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
         case RA_POWER_VSN:
             if((power_value < 24) || (power_value > 64))
             {
-                RA_POWEREX_INFO("VSN power value error %d\r\n",power_value);
-                RA_POWEREX_INFO("VSN range 24-64\r\n");
+                RA_POWEREX_INFO("The vsn voltage is %d *100*mv and is not set within the range of 24 to 64, error\r\n",power_value);
                 return BSP_ERROR;
             }
             else{
@@ -97,8 +95,8 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
         case RA_POWER_VCI:
             if((power_value < 10) || (power_value > 35))
             {
-                RA_POWEREX_INFO("VCI power value error %d\r\n",power_value);
-                RA_POWEREX_INFO("VCI range 10-35\r\n");
+                RA_POWEREX_INFO("The vci voltage is %d *100*mv and is not set within the range of 10 to 35, error\r\n",power_value);
+
                 return BSP_ERROR;
             }
             else{
@@ -111,8 +109,7 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
         case RA_POWER_IOVCC:
             if((power_value < 10) || (power_value > 35))
             {
-                RA_POWEREX_INFO("IOVCC power value error %d\r\n",power_value);
-                RA_POWEREX_INFO("IOVCC range 10-35\r\n");
+                RA_POWEREX_INFO("The iovcc_xb voltage is %d *100*mv and is not set within the range of 10 to 35, error\r\n",power_value);
                 return BSP_ERROR;
             }
             else{
@@ -126,8 +123,7 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
         case RA_POWER_MVDD:
             if((power_value < 10) || (power_value > 35))
             {
-                RA_POWEREX_INFO("MVDD power value error %d\r\n",power_value);
-                RA_POWEREX_INFO("MVDD range 10-35\r\n");
+                RA_POWEREX_INFO("The mvdd voltage is %d *100*mv and is not set within the range of 10 to 35, error\r\n",power_value);
                 return BSP_ERROR;
             }
             else{
@@ -140,8 +136,7 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
         case RA_POWER_VDDIO:
             if((power_value < 10) || (power_value > 35))
             {
-                RA_POWEREX_INFO("VDDIO power value error %d\r\n",power_value);
-                RA_POWEREX_INFO("VDDIO range 10-35\r\n");
+                RA_POWEREX_INFO("The vddio voltage is %d *100*mv and is not set within the range of 10 to 35, error\r\n",power_value);
                 return BSP_ERROR;
             }
             else{
@@ -149,7 +144,6 @@ BSP_STATUS_T drv_ra_set_power_vol(drv_ra_dev_t *dev,uint8_t power_name,uint8_t p
                 status = dev->lp3907->write(RA_LP3907_2_ADDRESS,0x10,0x75);
                 status = status | dev->lp3907->write(RA_LP3907_2_ADDRESS,RA_LP3907_2_VDDIO_CMD,temp_data);
             }
-            //printf("    SET POWER VDDIO %d status %d\r\n",power_value,status);
             break;
         default:
             return BSP_ERROR;
