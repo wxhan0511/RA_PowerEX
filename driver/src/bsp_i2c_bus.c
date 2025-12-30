@@ -15,7 +15,7 @@ BSP_STATUS_T bsp_i2c_bus_hw_write_data(void *handle, uint8_t address, uint8_t co
     {
         send_data[1 + i] = data[i];
     }
-    status = HAL_I2C_Master_Transmit((I2C_HandleTypeDef *)handle, (address) | 0x00, send_data, size + 1, 1000);
+    status = HAL_I2C_Master_Transmit_IT((I2C_HandleTypeDef *)handle, (address) | 0x00, send_data, size + 1);
     while (HAL_I2C_GetState((I2C_HandleTypeDef *)handle) != HAL_I2C_STATE_READY)
         ;
     if (status == HAL_OK)

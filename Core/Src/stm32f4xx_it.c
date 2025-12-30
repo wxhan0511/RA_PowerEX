@@ -487,7 +487,7 @@ void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, ui
   }
   else
   {
-    HAL_I2C_Slave_Seq_Transmit_IT(hi2c, i2c1_tx_buf, 1, I2C_NEXT_FRAME);
+    HAL_I2C_Slave_Seq_Transmit_IT(hi2c, i2c1_tx_buf, 1, I2C_LAST_FRAME);
   }
 }
 

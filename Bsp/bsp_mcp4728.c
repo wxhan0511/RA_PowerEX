@@ -33,7 +33,7 @@ dac_dev_t dac_dev = {
  * @param dev DAC设备结构体指针
  * @note 初始化时设置4路通道的默认输出电压，并拉低LDAC引脚使能输出
  */
-void  bsp_dac_init(dac_dev_t *dev)
+void   bsp_dac_init(dac_dev_t *dev)
 {
     //恢复上次设置的电压
     BSP_STATUS status;
@@ -110,8 +110,8 @@ BSP_STATUS bsp_dac_single_voltage_set(dac_dev_t* dev, const uint8_t channel, con
     buf[0] = MCP4728_SINGLE_WRITE | (channel << 1) | en; // Command and channel
     buf[1] = dev->val[channel] >> 8 | dev->vref[channel] << 7 | dev->gain[channel] << 4 | dev->pd[channel] << 5;
     buf[2] = dev->val[channel] & 0xFF; // Lower 8 bits of the 12-bit DAC value
-    const HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(
-        dev->i2c_bus->handle, dev->i2c_bus->dev_addr, buf, 3, 1000);
+    const HAL_StatusTypeDef status = HAL_I2C_Master_Transmit_IT(
+        dev->i2c_bus->handle, dev->i2c_bus->dev_addr, buf, 3);
         if (status != HAL_OK)
     {
         printf("I2C transmit failed %d \r\n", status);
