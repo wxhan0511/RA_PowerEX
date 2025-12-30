@@ -43,13 +43,14 @@ void tp_spi_cs_enable(bool state)
     else{
         HAL_GPIO_WritePin(TSPI_CS_GPIO_Port, TSPI_CS_Pin, 1);
         GTB_DEBUG("CS High\r\n");
+        
     }
 }
 void bsp_gtb_init(uint8_t mode){
 
     /* Set the SPI parameters */
     hspi_tp.Instance               = SPI2;
-    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+    hspi_tp.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
     hspi_tp.Init.Direction         = SPI_DIRECTION_2LINES;
     hspi_tp.Init.CLKPhase          = SPI_PHASE_1EDGE;
     hspi_tp.Init.CLKPolarity       = SPI_POLARITY_LOW;

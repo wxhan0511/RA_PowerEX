@@ -42,8 +42,8 @@ void MX_FREERTOS_Init(void)
   slave_rx_task_init();
   //slave_tx_task_init();
 
-  //master_tx_task_init();
-  master_rx_task_init();
+  master_tx_task_init();
+  //master_rx_task_init();
 
   //power_task_init();
 }
